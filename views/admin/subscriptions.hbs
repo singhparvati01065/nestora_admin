@@ -1,0 +1,32 @@
+{{> header}}
+<h1>Subscriptions</h1>
+<div class="sub">Set each society's plan</div>
+
+<div class="card">
+  <table>
+    <thead>
+      <tr><th>Society</th><th>Current plan</th><th>Expires</th><th>Change plan</th></tr>
+    </thead>
+    <tbody>
+      {{#each societies}}
+      <tr>
+        <td>{{this.name}}</td>
+        <td><span class="badge {{#if this.isFree}}free{{else}}paid{{/if}}">{{this.planLabel}}</span></td>
+        <td class="muted">{{this.expires}}</td>
+        <td>
+          <form method="post" action="/admin/subscriptions/{{this.id}}" style="display:flex; gap:8px">
+            <select name="plan">
+              <option value="FREE" {{#if this.isFree}}selected{{/if}}>Free</option>
+              <option value="PREMIUM_MONTHLY" {{#if this.isMonthly}}selected{{/if}}>Premium · Monthly</option>
+              <option value="PREMIUM_YEARLY" {{#if this.isYearly}}selected{{/if}}>Premium · Yearly</option>
+            </select>
+            <button class="btn primary small" type="submit">Save</button>
+          </form>
+        </td>
+      </tr>
+      {{/each}}
+      {{#unless societies}}<tr><td colspan="4" class="muted">No societies yet.</td></tr>{{/unless}}
+    </tbody>
+  </table>
+</div>
+{{> footer}}

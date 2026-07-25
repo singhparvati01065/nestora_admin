@@ -1,0 +1,33 @@
+{{> header}}
+<h1>Payments</h1>
+<div class="sub">Collected payments across all societies</div>
+
+<div class="stats">
+  <div class="stat"><div class="num">₹{{collected}}</div><div class="label">Total collected</div></div>
+  <div class="stat"><div class="num">₹{{pending}}</div><div class="label">Pending</div></div>
+  <div class="stat"><div class="num">{{count}}</div><div class="label">Payments shown</div></div>
+</div>
+
+<div class="card" style="margin-top:16px; overflow-x:auto">
+  <table>
+    <thead><tr><th>Society</th><th>Flat</th><th>Type</th><th>Amount</th><th>Paid on</th><th></th></tr></thead>
+    <tbody>
+      {{#each payments}}
+      <tr>
+        <td>{{this.society}}</td>
+        <td>{{this.flat}}</td>
+        <td>{{this.kind}}</td>
+        <td>₹{{this.amount}}</td>
+        <td class="muted">{{this.paidAt}}</td>
+        <td>
+          <form method="post" action="/admin/payments/{{this.id}}/refund" onsubmit="return confirm('Refund this payment? The bill goes back to unpaid.')">
+            <button class="btn ghost small" type="submit">Refund</button>
+          </form>
+        </td>
+      </tr>
+      {{/each}}
+      {{#unless payments}}<tr><td colspan="6" class="muted">No payments yet.</td></tr>{{/unless}}
+    </tbody>
+  </table>
+</div>
+{{> footer}}

@@ -1,0 +1,63 @@
+{{> header}}
+<h1>Reports &amp; Analytics</h1>
+<div class="sub">Platform usage and performance</div>
+
+<h2>Active Users</h2>
+<div class="stats">
+  <div class="stat"><div class="num">{{dau}}</div><div class="label">Daily Active Users</div></div>
+  <div class="stat"><div class="num">{{mau}}</div><div class="label">Monthly Active Users</div></div>
+</div>
+
+<h2>Visitor Analytics</h2>
+<div class="stats">
+  <div class="stat"><div class="num">{{visitors.total}}</div><div class="label">Total Visitors</div></div>
+  <div class="stat"><div class="num">{{visitors.inside}}</div><div class="label">Inside now</div></div>
+  <div class="stat"><div class="num">{{visitors.month}}</div><div class="label">This month</div></div>
+</div>
+
+<h2>Complaint Analytics</h2>
+<div class="stats">
+  <div class="stat"><div class="num">{{complaints.open}}</div><div class="label">Open</div></div>
+  <div class="stat"><div class="num">{{complaints.inProgress}}</div><div class="label">In progress</div></div>
+  <div class="stat"><div class="num">{{complaints.resolved}}</div><div class="label">Resolved</div></div>
+</div>
+{{#if complaints.byCategory}}
+<div class="card" style="margin-top:12px">
+  <table>
+    <thead><tr><th>Category</th><th>Complaints</th></tr></thead>
+    <tbody>
+      {{#each complaints.byCategory}}<tr><td>{{this.category}}</td><td>{{this.count}}</td></tr>{{/each}}
+    </tbody>
+  </table>
+</div>
+{{/if}}
+
+<h2>Payment Analytics</h2>
+<div class="stats">
+  <div class="stat"><div class="num">₹{{payments.revenue}}</div><div class="label">Total collected</div></div>
+  <div class="stat"><div class="num">₹{{payments.pending}}</div><div class="label">Pending</div></div>
+  <div class="stat"><div class="num">₹{{payments.thisMonth}}</div><div class="label">This month</div></div>
+  <div class="stat"><div class="num">₹{{payments.rent}}</div><div class="label">Rent</div></div>
+  <div class="stat"><div class="num">₹{{payments.maintenance}}</div><div class="label">Maintenance</div></div>
+  <div class="stat"><div class="num">₹{{payments.other}}</div><div class="label">Other</div></div>
+</div>
+
+<h2>Society-wise Usage</h2>
+<div class="card">
+  <table>
+    <thead><tr><th>Society</th><th>Residents</th><th>Bills</th><th>Complaints</th><th>Visitors</th></tr></thead>
+    <tbody>
+      {{#each usage}}
+      <tr>
+        <td>{{this.name}}</td>
+        <td>{{this.residents}}</td>
+        <td>{{this.bills}}</td>
+        <td>{{this.complaints}}</td>
+        <td>{{this.visitors}}</td>
+      </tr>
+      {{/each}}
+      {{#unless usage}}<tr><td colspan="5" class="muted">No societies yet.</td></tr>{{/unless}}
+    </tbody>
+  </table>
+</div>
+{{> footer}}

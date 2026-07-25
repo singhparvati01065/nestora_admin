@@ -1,0 +1,90 @@
+{{> header}}
+<h1>Notification Center</h1>
+<div class="sub">Send a notification to users</div>
+
+{{#if sent}}<div class="card" style="padding:14px 18px; margin-bottom:16px; color:#2e7d32">✓ Notification sent.</div>{{/if}}
+
+<div class="card" style="padding:22px; max-width:640px; margin-bottom:26px">
+  <form method="post" action="/admin/notifications" style="display:grid; gap:16px">
+    <div>
+      <label class="muted" style="font-size:13px">Title</label>
+      <input type="text" name="title" placeholder="e.g. New feature available" required style="margin-top:6px" />
+    </div>
+    <div>
+      <label class="muted" style="font-size:13px">Message</label>
+      <textarea name="message" rows="4" required
+        style="width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:9px; font-size:14px; font-family:inherit; margin-top:6px"></textarea>
+    </div>
+
+    <div>
+      <label class="muted" style="font-size:13px">Send via</label>
+      <div style="display:flex; gap:18px; margin-top:8px; flex-wrap:wrap">
+        <label style="display:flex; align-items:center; gap:6px; font-size:14px; cursor:pointer">
+          <input type="checkbox" name="channels" value="inapp" checked /> In-app Notification
+        </label>
+        <label style="display:flex; align-items:center; gap:6px; font-size:14px; cursor:pointer">
+          <input type="checkbox" name="channels" value="push" /> Push Notification
+        </label>
+        <label style="display:flex; align-items:center; gap:6px; font-size:14px; cursor:pointer">
+          <input type="checkbox" name="channels" value="email" /> Email
+        </label>
+      </div>
+      <div class="muted" style="font-size:12px; margin-top:6px">
+        In-app is delivered now. Push / Email are logged — real delivery needs an FCM / email provider.
+      </div>
+    </div>
+
+    <div>
+      <label class="muted" style="font-size:13px">Audience</label>
+      <div style="display:flex; gap:18px; margin-top:8px; flex-wrap:wrap">
+        <label style="display:flex; align-items:center; gap:6px; font-size:14px; cursor:pointer">
+          <input type="radio" name="audience" value="all_users" checked onchange="toggleList()" /> All Users
+        </label>
+        <label style="display:flex; align-items:center; gap:6px; font-size:14px; cursor:pointer">
+          <input type="radio" name="audience" value="all_admins" onchange="toggleList()" /> All Society Admins
+        </label>
+        <label style="display:flex; align-items:center; gap:6px; font-size:14px; cursor:pointer">
+          <input type="radio" name="audience" value="selected" onchange="toggleList()" /> Selected Societies
+        </label>
+      </div>
+    </div>
+
+    <div id="societyList" style="display:none; border:1px solid var(--line); border-radius:10px; padding:12px; max-height:220px; overflow:auto">
+      {{#each societies}}
+      <label style="display:flex; align-items:center; gap:8px; padding:6px 4px; font-size:14px; cursor:pointer">
+        <input type="checkbox" name="societyIds" value="{{this.id}}" /> {{this.name}}
+      </label>
+      {{/each}}
+      {{#unless societies}}<div class="muted">No societies yet.</div>{{/unless}}
+    </div>
+
+    <button class="btn primary" type="submit" style="justify-self:start">Send notification</button>
+  </form>
+</div>
+
+<h2>Recent sends</h2>
+<div class="card">
+  <table>
+    <thead><tr><th>Title</th><th>Channels</th><th>Audience</th><th>Recipients</th><th>When</th></tr></thead>
+    <tbody>
+      {{#each history}}
+      <tr>
+        <td>{{this.title}}</td>
+        <td class="muted">{{this.channels}}</td>
+        <td class="muted">{{this.audience}}</td>
+        <td>{{this.recipients}}</td>
+        <td class="muted">{{this.at}}</td>
+      </tr>
+      {{/each}}
+      {{#unless history}}<tr><td colspan="5" class="muted">Nothing sent yet.</td></tr>{{/unless}}
+    </tbody>
+  </table>
+</div>
+
+<script>
+  function toggleList() {
+    const sel = document.querySelector('input[name=audience]:checked').value === 'selected';
+    document.getElementById('societyList').style.display = sel ? 'block' : 'none';
+  }
+</script>
+{{> footer}}

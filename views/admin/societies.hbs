@@ -1,0 +1,62 @@
+{{> header}}
+<div style="display:flex; justify-content:space-between; align-items:center">
+  <div>
+    <h1>Society Management</h1>
+    <div class="sub">All societies on the platform</div>
+  </div>
+  <a class="btn ghost small" href="/admin/export/societies.csv">Export CSV</a>
+</div>
+
+<div class="card" style="overflow-x:auto">
+  <table>
+    <thead>
+      <tr>
+        <th>Logo</th><th>Society</th><th>City</th><th>State</th>
+        <th>Admin</th><th>Contact</th><th>Plan</th><th>Status</th>
+        <th>Created</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each societies}}
+      <tr>
+        <td>
+          {{#if this.logo}}
+            <img src="{{this.logo}}" class="logo-sm" alt="" />
+          {{else}}
+            <span class="logo-sm logo-fallback">{{this.initial}}</span>
+          {{/if}}
+        </td>
+        <td><a class="rowlink" href="/admin/societies/{{this.id}}">{{this.name}}</a></td>
+        <td>{{this.city}}</td>
+        <td>{{this.state}}</td>
+        <td>{{this.adminName}}</td>
+        <td class="muted">{{this.contact}}</td>
+        <td><span class="badge {{#if this.isFree}}free{{else}}paid{{/if}}">{{this.plan}}</span></td>
+        <td>{{#if this.suspended}}<span class="badge bad">Suspended</span>{{else}}<span class="badge ok">Active</span>{{/if}}</td>
+        <td class="muted" style="white-space:nowrap">{{this.created}}</td>
+        <td>
+          <div class="row-actions">
+            <a class="btn ghost small" href="/admin/societies/{{this.id}}">View</a>
+            <a class="btn ghost small" href="/admin/societies/{{this.id}}#edit">Edit</a>
+            <form method="post" action="/admin/societies/{{this.id}}/suspend">
+              {{#if this.suspended}}
+                <button class="btn ghost small" type="submit">Activate</button>
+              {{else}}
+                <button class="btn ghost small" type="submit">Suspend</button>
+              {{/if}}
+            </form>
+            <form method="post" action="/admin/societies/{{this.id}}/impersonate">
+              <button class="btn primary small" type="submit">Login as</button>
+            </form>
+            <form method="post" action="/admin/societies/{{this.id}}/delete" onsubmit="return confirm('Delete this society and ALL its data?')">
+              <button class="btn danger small" type="submit">Delete</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {{/each}}
+      {{#unless societies}}<tr><td colspan="10" class="muted">No societies yet.</td></tr>{{/unless}}
+    </tbody>
+  </table>
+</div>
+{{> footer}}

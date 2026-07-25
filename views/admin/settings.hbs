@@ -1,0 +1,55 @@
+{{> header}}
+<h1>Settings</h1>
+<div class="sub">Platform configuration</div>
+
+{{#if saved}}<div class="card" style="padding:14px 18px; margin-bottom:16px; color:#2e7d32">✓ Settings saved.</div>{{/if}}
+{{#if ok}}<div class="card" style="padding:14px 18px; margin-bottom:16px; color:#2e7d32">✓ Password changed.</div>{{/if}}
+{{#if error}}<div class="card" style="padding:14px 18px; margin-bottom:16px; color:#d32f2f">Current password is wrong, or new password too short.</div>{{/if}}
+
+<div class="card" style="padding:22px; max-width:680px; margin-bottom:24px">
+  <form method="post" action="/admin/settings/general" style="display:grid; gap:16px">
+    <h2 style="margin:0">General</h2>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px">
+      <div>
+        <label class="muted" style="font-size:13px">App Name</label>
+        <input type="text" name="appName" value="{{s.appName}}" style="margin-top:6px" />
+      </div>
+      <div>
+        <label class="muted" style="font-size:13px">Default Language</label>
+        <input type="text" name="defaultLanguage" value="{{s.defaultLanguage}}" placeholder="en" style="margin-top:6px" />
+      </div>
+    </div>
+    <div>
+      <label class="muted" style="font-size:13px">Logo URL</label>
+      <input type="text" name="logoUrl" value="{{s.logoUrl}}" placeholder="https://…" style="margin-top:6px" />
+    </div>
+    <label style="display:flex; align-items:center; gap:8px; font-size:14px; cursor:pointer">
+      <input type="checkbox" name="maintenanceMode" {{#if s.maintenanceMode}}checked{{/if}} />
+      Maintenance Mode <span class="muted" style="font-size:13px">(app shows an "under maintenance" screen)</span>
+    </label>
+
+    <h2 style="margin:8px 0 0">Integrations</h2>
+    <div class="muted" style="font-size:12px; margin-top:-8px">Keys are stored securely. Connecting them to real services is a separate step.</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px">
+      <div><label class="muted" style="font-size:13px">SMTP Host</label><input type="text" name="smtpHost" value="{{s.smtpHost}}" style="margin-top:6px" /></div>
+      <div><label class="muted" style="font-size:13px">SMTP User</label><input type="text" name="smtpUser" value="{{s.smtpUser}}" style="margin-top:6px" /></div>
+      <div><label class="muted" style="font-size:13px">SMTP Password</label><input type="password" name="smtpPass" value="{{s.smtpPass}}" style="margin-top:6px" /></div>
+      <div><label class="muted" style="font-size:13px">Firebase Key</label><input type="text" name="firebaseKey" value="{{s.firebaseKey}}" style="margin-top:6px" /></div>
+      <div><label class="muted" style="font-size:13px">Payment Gateway Key</label><input type="text" name="paymentKey" value="{{s.paymentKey}}" style="margin-top:6px" /></div>
+      <div><label class="muted" style="font-size:13px">WhatsApp API Key</label><input type="text" name="whatsappKey" value="{{s.whatsappKey}}" style="margin-top:6px" /></div>
+      <div><label class="muted" style="font-size:13px">SMS API Key</label><input type="text" name="smsKey" value="{{s.smsKey}}" style="margin-top:6px" /></div>
+    </div>
+
+    <button class="btn primary" type="submit" style="justify-self:start">Save settings</button>
+  </form>
+</div>
+
+<div class="card" style="padding:20px; max-width:420px">
+  <h2 style="margin:0 0 14px">Change password</h2>
+  <form method="post" action="/admin/settings/password" style="display:grid; gap:12px">
+    <input type="password" name="current" placeholder="Current password" required />
+    <input type="password" name="next" placeholder="New password (min 4 chars)" required />
+    <button class="btn primary" type="submit" style="justify-self:start">Update password</button>
+  </form>
+</div>
+{{> footer}}

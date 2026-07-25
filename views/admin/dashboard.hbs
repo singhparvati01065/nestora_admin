@@ -1,0 +1,88 @@
+{{> header}}
+<h1>Dashboard</h1>
+<div class="sub">Platform overview</div>
+
+<div class="stats">
+  <div class="stat"><div class="num">{{stats.totalSocieties}}</div><div class="label">Total Societies</div></div>
+  <div class="stat"><div class="num">{{stats.activeSocieties}}</div><div class="label">Active Societies</div></div>
+  <div class="stat"><div class="num">{{stats.inactiveSocieties}}</div><div class="label">Inactive Societies</div></div>
+  <div class="stat"><div class="num">{{stats.totalResidents}}</div><div class="label">Total Residents</div></div>
+  <div class="stat"><div class="num">{{stats.totalAdmins}}</div><div class="label">Society Admins</div></div>
+  <div class="stat"><div class="num">{{stats.totalGuards}}</div><div class="label">Total Guards</div></div>
+  <div class="stat"><div class="num">{{stats.totalVisitors}}</div><div class="label">Total Visitors</div></div>
+  <div class="stat"><div class="num">{{stats.totalComplaints}}</div><div class="label">Total Complaints</div></div>
+  <div class="stat"><div class="num">₹{{stats.totalRevenue}}</div><div class="label">Total Revenue</div></div>
+  <div class="stat"><div class="num">₹{{stats.totalMaintenance}}</div><div class="label">Maintenance Collected</div></div>
+  <div class="stat"><div class="num">{{stats.newRegistrations}}</div><div class="label">New Registrations (30d)</div></div>
+</div>
+
+<div class="chart-row">
+  <div class="card chart-card">
+    <h2 style="margin:0 0 12px">Society Growth</h2>
+    <canvas id="growthChart" height="150"></canvas>
+  </div>
+  <div class="card chart-card">
+    <h2 style="margin:0 0 12px">Active Users</h2>
+    <canvas id="usersChart" height="150"></canvas>
+  </div>
+</div>
+<div class="chart-row">
+  <div class="card chart-card">
+    <h2 style="margin:0 0 12px">Monthly Revenue</h2>
+    <canvas id="revenueChart" height="150"></canvas>
+  </div>
+  <div class="card chart-card">
+    <h2 style="margin:0 0 12px">Login Analytics (14 days)</h2>
+    <canvas id="loginChart" height="150"></canvas>
+  </div>
+</div>
+
+<h2>Recent societies</h2>
+<div class="card">
+  <table>
+    <thead><tr><th>Society</th><th>Flats</th><th>Users</th><th>Plan</th><th>Status</th></tr></thead>
+    <tbody>
+      {{#each recent}}
+      <tr>
+        <td><a class="rowlink" href="/admin/societies/{{this.id}}">{{this.name}}</a></td>
+        <td>{{this.flats}}</td>
+        <td>{{this.users}}</td>
+        <td><span class="badge {{#if (eq this.plan 'Free')}}free{{else}}paid{{/if}}">{{this.plan}}</span></td>
+        <td>{{#if this.suspended}}<span class="badge bad">Suspended</span>{{else}}<span class="badge ok">Active</span>{{/if}}</td>
+      </tr>
+      {{/each}}
+      {{#unless recent}}<tr><td colspan="5" class="muted">No societies yet.</td></tr>{{/unless}}
+    </tbody>
+  </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script>
+  const growth = {{{json growth}}};
+  const revenue = {{{json revenue}}};
+  const activeUsers = {{{json activeUsers}}};
+  const loginAnalytics = {{{json loginAnalytics}}};
+  const P = '#6C4AB6';
+
+  new Chart(document.getElementById('growthChart'), {
+    type: 'bar',
+    data: { labels: growth.labels, datasets: [{ label: 'New societies', data: growth.data, backgroundColor: P, borderRadius: 6 }] },
+    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+  });
+  new Chart(document.getElementById('usersChart'), {
+    type: 'doughnut',
+    data: { labels: activeUsers.labels, datasets: [{ data: activeUsers.data, backgroundColor: ['#6C4AB6', '#8b6fd0', '#b39ddb', '#d1c4e9'] }] },
+    options: { plugins: { legend: { position: 'bottom' } } }
+  });
+  new Chart(document.getElementById('revenueChart'), {
+    type: 'line',
+    data: { labels: revenue.labels, datasets: [{ label: 'Revenue ₹', data: revenue.data, borderColor: P, backgroundColor: 'rgba(108,74,182,0.12)', fill: true, tension: 0.35 }] },
+    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+  });
+  new Chart(document.getElementById('loginChart'), {
+    type: 'line',
+    data: { labels: loginAnalytics.labels, datasets: [{ label: 'Logins', data: loginAnalytics.data, borderColor: '#2e7d32', backgroundColor: 'rgba(46,125,50,0.12)', fill: true, tension: 0.35 }] },
+    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+  });
+</script>
+{{> footer}}

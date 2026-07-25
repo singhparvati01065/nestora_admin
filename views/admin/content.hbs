@@ -1,0 +1,20 @@
+{{> header}}
+<h1>Content (CMS)</h1>
+<div class="sub">Edit app pages without shipping an update</div>
+
+<div class="card">
+  <table>
+    <thead><tr><th>Page</th><th>Status</th><th>Last updated</th><th></th></tr></thead>
+    <tbody>
+      {{#each pages}}
+      <tr>
+        <td><a class="rowlink" href="/admin/content/{{this.key}}">{{this.title}}</a></td>
+        <td>{{#if this.empty}}<span class="badge free">Empty</span>{{else}}<span class="badge ok">Published</span>{{/if}}</td>
+        <td class="muted">{{this.updated}}</td>
+        <td><a class="btn ghost small" href="/admin/content/{{this.key}}">Edit</a></td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>
+{{> footer}}

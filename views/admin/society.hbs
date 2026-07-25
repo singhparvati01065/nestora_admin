@@ -1,0 +1,102 @@
+{{> header}}
+<a class="back" href="/admin/societies">← Societies</a>
+<h1 style="margin-top:8px">{{s.name}}</h1>
+<div class="sub">{{s.address}} · created {{s.created}}</div>
+
+<div class="detail-grid">
+  <div class="stat"><div class="num">{{s.flats}}</div><div class="label">Flats</div></div>
+  <div class="stat"><div class="num">{{residents.length}}</div><div class="label">Residents</div></div>
+  <div class="stat"><div class="num">{{bills.length}}</div><div class="label">Bills</div></div>
+  <div class="stat"><div class="num">{{complaints.length}}</div><div class="label">Complaints</div></div>
+</div>
+
+<div class="card" style="padding:18px 20px; margin-bottom:20px">
+  <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap">
+    <div><span class="muted">Plan:</span> <span class="badge {{#if (eq s.plan 'Free')}}free{{else}}paid{{/if}}">{{s.plan}}</span></div>
+    <div>
+      <span class="muted">Status:</span>
+      {{#if s.suspended}}<span class="badge bad">Suspended</span>{{else}}<span class="badge ok">Active</span>{{/if}}
+    </div>
+  </div>
+</div>
+
+<h2 id="edit">Edit details</h2>
+<div class="card" style="padding:18px 20px; margin-bottom:20px">
+  <form method="post" action="/admin/societies/{{s.id}}/edit">
+    <label class="muted" style="font-size:13px">Name</label>
+    <input type="text" name="name" value="{{s.name}}" style="margin:6px 0 12px" />
+    <label class="muted" style="font-size:13px">Address</label>
+    <input type="text" name="address" value="{{s.address}}" style="margin:6px 0 12px" />
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
+      <div>
+        <label class="muted" style="font-size:13px">City</label>
+        <input type="text" name="city" value="{{s.city}}" style="margin:6px 0 14px" />
+      </div>
+      <div>
+        <label class="muted" style="font-size:13px">State</label>
+        <input type="text" name="state" value="{{s.state}}" style="margin:6px 0 14px" />
+      </div>
+    </div>
+    <button class="btn primary" type="submit">Save</button>
+  </form>
+</div>
+
+<h2>Admins</h2>
+<div class="card">
+  <table>
+    <thead><tr><th>Name</th><th>Phone</th></tr></thead>
+    <tbody>
+      {{#each s.admins}}<tr><td>{{this.name}}</td><td>{{this.phone}}</td></tr>{{/each}}
+      {{#unless s.admins}}<tr><td colspan="2" class="muted">No admin linked.</td></tr>{{/unless}}
+    </tbody>
+  </table>
+</div>
+
+<h2>Residents</h2>
+<div class="card">
+  <table>
+    <thead><tr><th>Name</th><th>Flat</th><th>Type</th><th>Phone</th></tr></thead>
+    <tbody>
+      {{#each residents}}<tr><td>{{this.name}}</td><td>{{this.flat}}</td><td>{{this.type}}</td><td class="muted">{{this.phone}}</td></tr>{{/each}}
+      {{#unless residents}}<tr><td colspan="4" class="muted">No residents.</td></tr>{{/unless}}
+    </tbody>
+  </table>
+</div>
+
+<h2>Bills</h2>
+<div class="card">
+  <table>
+    <thead><tr><th>Flat</th><th>Kind</th><th>Amount</th><th>Status</th></tr></thead>
+    <tbody>
+      {{#each bills}}
+      <tr>
+        <td>{{this.flat}}</td><td>{{this.kind}}</td><td>₹{{this.amount}}</td>
+        <td>{{#if this.paid}}<span class="badge ok">Paid</span>{{else}}<span class="badge free">Unpaid</span>{{/if}}</td>
+      </tr>
+      {{/each}}
+      {{#unless bills}}<tr><td colspan="4" class="muted">No bills.</td></tr>{{/unless}}
+    </tbody>
+  </table>
+</div>
+
+<h2>Complaints</h2>
+<div class="card">
+  <table>
+    <thead><tr><th>Title</th><th>Category</th><th>Status</th></tr></thead>
+    <tbody>
+      {{#each complaints}}<tr><td>{{this.title}}</td><td>{{this.category}}</td><td>{{this.status}}</td></tr>{{/each}}
+      {{#unless complaints}}<tr><td colspan="3" class="muted">No complaints.</td></tr>{{/unless}}
+    </tbody>
+  </table>
+</div>
+
+<h2>Actions</h2>
+<div class="row-actions">
+  <form method="post" action="/admin/societies/{{s.id}}/suspend">
+    <button class="btn ghost" type="submit">{{#if s.suspended}}Un-suspend{{else}}Suspend{{/if}}</button>
+  </form>
+  <form method="post" action="/admin/societies/{{s.id}}/delete" onsubmit="return confirm('Delete this society and ALL its data? This cannot be undone.')">
+    <button class="btn danger" type="submit">Delete society</button>
+  </form>
+</div>
+{{> footer}}

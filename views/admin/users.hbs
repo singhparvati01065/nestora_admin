@@ -1,0 +1,38 @@
+{{> header}}
+<div style="display:flex; justify-content:space-between; align-items:center">
+  <div>
+    <h1>Users</h1>
+    <div class="sub">All accounts across societies</div>
+  </div>
+  <a class="btn ghost small" href="/admin/export/users.csv">Export CSV</a>
+</div>
+
+<form method="get" action="/admin/users" class="searchbar">
+  <input type="search" name="q" value="{{q}}" placeholder="Search name or phone…" />
+</form>
+
+<div class="card">
+  <table>
+    <thead>
+      <tr><th>Name</th><th>Phone</th><th>Role</th><th>Society</th><th>Status</th><th></th></tr>
+    </thead>
+    <tbody>
+      {{#each users}}
+      <tr>
+        <td>{{this.name}}</td>
+        <td>{{this.phone}}</td>
+        <td>{{this.role}}</td>
+        <td class="muted">{{this.society}}</td>
+        <td>{{#if this.banned}}<span class="badge bad">Blocked</span>{{else}}<span class="badge ok">Active</span>{{/if}}</td>
+        <td>
+          <form method="post" action="/admin/users/{{this.id}}/ban">
+            <button class="btn {{#if this.banned}}ghost{{else}}danger{{/if}} small" type="submit">{{#if this.banned}}Unblock{{else}}Block{{/if}}</button>
+          </form>
+        </td>
+      </tr>
+      {{/each}}
+      {{#unless users}}<tr><td colspan="6" class="muted">No users found.</td></tr>{{/unless}}
+    </tbody>
+  </table>
+</div>
+{{> footer}}

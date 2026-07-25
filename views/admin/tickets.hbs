@@ -1,0 +1,44 @@
+{{> header}}
+<h1>Support Tickets</h1>
+<div class="sub">Raised by society admins</div>
+
+<div class="row-actions" style="margin-bottom:16px">
+  <a class="btn {{#if (eq status '')}}primary{{else}}ghost{{/if}} small" href="/admin/tickets">All</a>
+  <a class="btn {{#if (eq status 'OPEN')}}primary{{else}}ghost{{/if}} small" href="/admin/tickets?status=OPEN">Open</a>
+  <a class="btn {{#if (eq status 'PENDING')}}primary{{else}}ghost{{/if}} small" href="/admin/tickets?status=PENDING">Pending</a>
+  <a class="btn {{#if (eq status 'CLOSED')}}primary{{else}}ghost{{/if}} small" href="/admin/tickets?status=CLOSED">Closed</a>
+</div>
+
+{{#each tickets}}
+<div class="card" style="padding:16px; margin-bottom:12px">
+  <div style="display:flex; justify-content:space-between; align-items:start; gap:12px">
+    <div>
+      <div style="font-weight:600">{{this.subject}}</div>
+      <div class="muted" style="font-size:13px; margin-top:2px">{{this.category}} · {{this.society}} · {{this.created}}</div>
+    </div>
+    <span class="badge {{#if this.isClosed}}ok{{else if this.isPending}}free{{else}}paid{{/if}}">{{this.status}}</span>
+  </div>
+  <p style="margin:10px 0 0">{{this.message}}</p>
+  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; align-items:center">
+    <form method="post" action="/admin/tickets/{{this.id}}/status" style="display:flex; gap:6px; align-items:center">
+      <span class="muted" style="font-size:13px">Status</span>
+      <select name="status" onchange="this.form.submit()">
+        <option value="OPEN" {{#if this.isOpen}}selected{{/if}}>Open</option>
+        <option value="PENDING" {{#if this.isPending}}selected{{/if}}>Pending</option>
+        <option value="CLOSED" {{#if this.isClosed}}selected{{/if}}>Closed</option>
+      </select>
+    </form>
+    <form method="post" action="/admin/tickets/{{this.id}}/assign" style="display:flex; gap:6px; align-items:center">
+      <span class="muted" style="font-size:13px">Assign</span>
+      <select name="assignee" onchange="this.form.submit()">
+        <option value="" {{#unless this.assignee}}selected{{/unless}}>Unassigned</option>
+        {{#each ../assignees}}
+          <option value="{{this}}" {{#if (eq this ../assignee)}}selected{{/if}}>{{this}}</option>
+        {{/each}}
+      </select>
+    </form>
+  </div>
+</div>
+{{/each}}
+{{#unless tickets}}<div class="card" style="padding:24px" class="muted">No tickets.</div>{{/unless}}
+{{> footer}}

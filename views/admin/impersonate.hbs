@@ -1,0 +1,30 @@
+{{> header}}
+<a class="back" href="/admin/societies">← Societies</a>
+<h1 style="margin-top:8px">Login as {{adminName}}</h1>
+<div class="sub">{{societyName}} · impersonation token (valid 1 hour)</div>
+
+<div class="card" style="padding:20px; max-width:720px">
+  <p class="muted" style="margin-bottom:12px">
+    Use this token as a <code>Bearer</code> token to access the app's API as this
+    society's admin — for support / debugging. It expires in 1 hour.
+  </p>
+  <textarea id="tok" readonly rows="5"
+    style="width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:9px; font-size:12px; font-family:monospace; word-break:break-all">{{token}}</textarea>
+  <div class="row-actions" style="margin-top:12px">
+    <button class="btn primary" type="button" onclick="copyTok()">Copy token</button>
+    <a class="btn ghost" href="/admin/societies">Done</a>
+  </div>
+  <p class="muted" style="margin-top:14px; font-size:13px">
+    Example:<br />
+    <code style="font-size:12px">curl {{apiBase}}/api/bills -H "Authorization: Bearer &lt;token&gt;"</code>
+  </p>
+</div>
+
+<script>
+  function copyTok() {
+    const t = document.getElementById('tok');
+    t.select();
+    navigator.clipboard.writeText(t.value);
+  }
+</script>
+{{> footer}}

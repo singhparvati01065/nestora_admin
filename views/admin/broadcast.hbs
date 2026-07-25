@@ -1,0 +1,50 @@
+{{> header}}
+<h1>Announcements</h1>
+<div class="sub">Send a notification to societies</div>
+
+{{#if sent}}<div class="card" style="padding:14px 18px; margin-bottom:16px; color:#2e7d32">✓ Announcement sent.</div>{{/if}}
+
+<div class="card" style="padding:20px; max-width:620px">
+  <form method="post" action="/admin/broadcast" style="display:grid; gap:14px">
+    <div>
+      <label class="muted" style="font-size:13px">Title</label>
+      <input type="text" name="title" placeholder="e.g. New Version / Downtime Notice" required style="margin-top:6px" />
+    </div>
+    <div>
+      <label class="muted" style="font-size:13px">Message</label>
+      <textarea name="message" rows="4" placeholder="Your announcement…" required
+        style="width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:9px; font-size:14px; font-family:inherit; margin-top:6px"></textarea>
+    </div>
+
+    <div>
+      <label class="muted" style="font-size:13px">Send to</label>
+      <div style="display:flex; gap:18px; margin-top:8px">
+        <label style="display:flex; align-items:center; gap:6px; font-size:14px; cursor:pointer">
+          <input type="radio" name="target" value="all" checked onchange="toggleList()" /> All Societies
+        </label>
+        <label style="display:flex; align-items:center; gap:6px; font-size:14px; cursor:pointer">
+          <input type="radio" name="target" value="selected" onchange="toggleList()" /> Selected Societies
+        </label>
+      </div>
+    </div>
+
+    <div id="societyList" style="display:none; border:1px solid var(--line); border-radius:10px; padding:12px; max-height:240px; overflow:auto">
+      {{#each societies}}
+      <label style="display:flex; align-items:center; gap:8px; padding:6px 4px; font-size:14px; cursor:pointer">
+        <input type="checkbox" name="societyIds" value="{{this.id}}" /> {{this.name}}
+      </label>
+      {{/each}}
+      {{#unless societies}}<div class="muted">No societies yet.</div>{{/unless}}
+    </div>
+
+    <button class="btn primary" type="submit" style="justify-self:start">Send announcement</button>
+  </form>
+</div>
+
+<script>
+  function toggleList() {
+    const sel = document.querySelector('input[name=target]:checked').value === 'selected';
+    document.getElementById('societyList').style.display = sel ? 'block' : 'none';
+  }
+</script>
+{{> footer}}

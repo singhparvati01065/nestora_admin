@@ -1,0 +1,24 @@
+{{> header}}
+<h1>Feature Flags</h1>
+<div class="sub">Turn platform features on or off</div>
+
+<div class="card">
+  <table>
+    <thead><tr><th>Feature</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      {{#each flags}}
+      <tr>
+        <td>{{this.label}}</td>
+        <td>{{#if this.enabled}}<span class="badge ok">On</span>{{else}}<span class="badge bad">Off</span>{{/if}}</td>
+        <td>
+          <form method="post" action="/admin/flags/{{this.key}}">
+            <button class="btn {{#if this.enabled}}ghost{{else}}primary{{/if}} small" type="submit">{{#if this.enabled}}Turn off{{else}}Turn on{{/if}}</button>
+          </form>
+        </td>
+      </tr>
+      {{/each}}
+      {{#unless flags}}<tr><td colspan="3" class="muted">No feature flags.</td></tr>{{/unless}}
+    </tbody>
+  </table>
+</div>
+{{> footer}}

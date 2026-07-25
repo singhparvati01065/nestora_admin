@@ -1,0 +1,44 @@
+{{> header}}
+<h1>App Version Management</h1>
+<div class="sub">Control update prompts shown in the mobile app · last updated {{cfg.updated}}</div>
+
+{{#if ok}}<div class="card" style="padding:14px 18px; margin-bottom:16px; color:#2e7d32">✓ Saved.</div>{{/if}}
+
+<div class="card" style="padding:22px; max-width:620px">
+  <form method="post" action="/admin/app-version" style="display:grid; gap:16px">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px">
+      <div>
+        <label class="muted" style="font-size:13px">Current Android Version</label>
+        <input type="text" name="androidVersion" value="{{cfg.androidVersion}}" placeholder="1.2.0" style="margin-top:6px" />
+      </div>
+      <div>
+        <label class="muted" style="font-size:13px">Current iOS Version</label>
+        <input type="text" name="iosVersion" value="{{cfg.iosVersion}}" placeholder="1.2.0" style="margin-top:6px" />
+      </div>
+    </div>
+
+    <div>
+      <label class="muted" style="font-size:13px">Update type</label>
+      <div style="display:flex; gap:18px; margin-top:8px">
+        <label style="display:flex; align-items:center; gap:6px; font-size:14px; cursor:pointer">
+          <input type="radio" name="updateType" value="optional" {{#unless cfg.forceUpdate}}checked{{/unless}} /> Optional Update
+        </label>
+        <label style="display:flex; align-items:center; gap:6px; font-size:14px; cursor:pointer">
+          <input type="radio" name="updateType" value="force" {{#if cfg.forceUpdate}}checked{{/if}} /> Force Update
+        </label>
+      </div>
+      <div class="muted" style="font-size:12px; margin-top:6px">
+        Force = users on an older version must update before using the app. Optional = a dismissible prompt.
+      </div>
+    </div>
+
+    <div>
+      <label class="muted" style="font-size:13px">Release Notes</label>
+      <textarea name="releaseNotes" rows="5" placeholder="What's new in this version…"
+        style="width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:9px; font-size:14px; font-family:inherit; margin-top:6px">{{cfg.releaseNotes}}</textarea>
+    </div>
+
+    <button class="btn primary" type="submit" style="justify-self:start">Save</button>
+  </form>
+</div>
+{{> footer}}

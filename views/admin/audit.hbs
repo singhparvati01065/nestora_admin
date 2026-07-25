@@ -1,0 +1,21 @@
+{{> header}}
+<h1>Audit Log</h1>
+<div class="sub">Actions taken in this panel</div>
+
+<div class="card">
+  <table>
+    <thead><tr><th>When</th><th>Action</th><th>Detail</th><th>By</th></tr></thead>
+    <tbody>
+      {{#each logs}}
+      <tr>
+        <td class="muted">{{this.at}}</td>
+        <td>{{this.action}}</td>
+        <td>{{this.detail}}</td>
+        <td class="muted">{{this.actor}}</td>
+      </tr>
+      {{/each}}
+      {{#unless logs}}<tr><td colspan="4" class="muted">No activity yet.</td></tr>{{/unless}}
+    </tbody>
+  </table>
+</div>
+{{> footer}}

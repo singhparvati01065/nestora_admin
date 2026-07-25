@@ -1,0 +1,22 @@
+{{> header}}
+<a class="back" href="/admin/content">← Content</a>
+<h1 style="margin-top:8px">{{p.title}}</h1>
+<div class="sub">This shows live in the app — no update needed</div>
+
+{{#if ok}}<div class="card" style="padding:14px 18px; margin-bottom:16px; color:#2e7d32">✓ Saved.</div>{{/if}}
+
+<div class="card" style="padding:20px; max-width:760px">
+  <form method="post" action="/admin/content/{{p.key}}" style="display:grid; gap:14px">
+    <div>
+      <label class="muted" style="font-size:13px">Title</label>
+      <input type="text" name="title" value="{{p.title}}" style="margin-top:6px" />
+    </div>
+    <div>
+      <label class="muted" style="font-size:13px">Content</label>
+      <textarea name="body" rows="16"
+        style="width:100%; padding:12px; border:1px solid var(--line); border-radius:9px; font-size:14px; font-family:inherit; line-height:1.5; margin-top:6px">{{p.body}}</textarea>
+    </div>
+    <button class="btn primary" type="submit" style="justify-self:start">Save</button>
+  </form>
+</div>
+{{> footer}}

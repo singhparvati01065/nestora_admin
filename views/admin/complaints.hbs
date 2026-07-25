@@ -1,0 +1,30 @@
+{{> header}}
+<h1>Complaints</h1>
+<div class="sub">Across all societies</div>
+
+<div class="row-actions" style="margin-bottom:16px">
+  <a class="btn {{#if (eq status '')}}primary{{else}}ghost{{/if}} small" href="/admin/complaints">All</a>
+  <a class="btn {{#if (eq status 'OPEN')}}primary{{else}}ghost{{/if}} small" href="/admin/complaints?status=OPEN">Open</a>
+  <a class="btn {{#if (eq status 'IN_PROGRESS')}}primary{{else}}ghost{{/if}} small" href="/admin/complaints?status=IN_PROGRESS">In progress</a>
+  <a class="btn {{#if (eq status 'RESOLVED')}}primary{{else}}ghost{{/if}} small" href="/admin/complaints?status=RESOLVED">Resolved</a>
+</div>
+
+<div class="card">
+  <table>
+    <thead><tr><th>Title</th><th>Category</th><th>Society</th><th>Flat</th><th>Status</th><th>Date</th></tr></thead>
+    <tbody>
+      {{#each complaints}}
+      <tr>
+        <td>{{this.title}}</td>
+        <td>{{this.category}}</td>
+        <td class="muted">{{this.society}}</td>
+        <td>{{this.flat}}</td>
+        <td>{{this.status}}</td>
+        <td class="muted">{{this.created}}</td>
+      </tr>
+      {{/each}}
+      {{#unless complaints}}<tr><td colspan="6" class="muted">No complaints.</td></tr>{{/unless}}
+    </tbody>
+  </table>
+</div>
+{{> footer}}
