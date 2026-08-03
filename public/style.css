@@ -47,7 +47,11 @@ body {
 .sidebar .logout:hover { background: #2c2544; color: #fff; }
 
 /* Content */
-.content { flex: 1; padding: 30px 36px; max-width: 1100px; }
+/* No max-width: the content pane fills whatever the sidebar leaves, so wide
+   screens don't strand empty space on the right. `min-width: 0` keeps wide
+   children (tables, charts) shrinking inside the flex row instead of
+   overflowing it. */
+.content { flex: 1; min-width: 0; padding: 30px 36px; }
 .content h1 { font-size: 26px; margin-bottom: 4px; }
 .content .sub { color: var(--muted); margin-bottom: 24px; }
 .content h2 { font-size: 17px; margin: 28px 0 12px; }
