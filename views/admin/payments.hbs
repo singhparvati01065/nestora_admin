@@ -1,33 +1,109 @@
 {{> header}}
-<h1>Payments</h1>
-<div class="sub">Collected payments across all societies</div>
+<div style="display:flex; justify-content:space-between; align-items:center">
+  <div>
+    <h1>Payments</h1>
+    <div class="sub">Bills across all societies · no gateway is connected, so “paid” means marked paid in the app</div>
+  </div>
+  <a class="btn ghost small" href="/admin/export/payments.csv">Export CSV</a>
+</div>
 
 <div class="stats">
   <div class="stat"><div class="num">₹{{collected}}</div><div class="label">Total collected</div></div>
-  <div class="stat"><div class="num">₹{{pending}}</div><div class="label">Pending</div></div>
-  <div class="stat"><div class="num">{{count}}</div><div class="label">Payments shown</div></div>
+  {{!-- The pending figure is a link, so the bills behind it are one click away. --}}
+  <a class="stat" href="{{unpaidUrl}}" style="text-decoration:none; color:inherit">
+    <div class="num">₹{{pending}}</div><div class="label">Pending · view unpaid</div>
+  </a>
+  <div class="stat"><div class="num">{{count}}</div><div class="label">Bills shown</div></div>
 </div>
 
-<div class="card" style="margin-top:16px; overflow-x:auto">
+{{#if reminded}}<div class="card" style="padding:14px 18px; margin-bottom:16px; color:#2e7d32">✓ Reminder sent{{#unless (eq reminded 1)}} to {{reminded}} societies{{/unless}}.</div>{{/if}}
+
+{{!-- The totals above say how much is owed; this says by whom, which is the
+      only version you can act on. Sorted by amount, biggest debtor first. --}}
+{{#if dues}}
+<div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:26px">
+  <div>
+    <h2 class="col-head" style="margin:0">Outstanding by society</h2>
+    <div class="muted" style="font-size:13px; margin-top:4px">
+      ₹{{duesTotal}} unpaid across {{dues.length}} {{#if (eq dues.length 1)}}society{{else}}societies{{/if}}
+    </div>
+  </div>
+  <form method="post" action="/admin/payments/remind-all"
+        onsubmit="return confirm('Send a payment reminder to every society that owes something?')">
+    <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
+    <button class="btn ghost small" type="submit">Remind all</button>
+  </form>
+</div>
+<div class="card" style="margin-top:12px">
   <table>
-    <thead><tr><th>Society</th><th>Flat</th><th>Type</th><th>Amount</th><th>Paid on</th><th></th></tr></thead>
+    <thead>
+      <tr>
+        <th>Society</th>
+        <th>Unpaid</th>
+        <th>Oldest due</th>
+        <th>Amount</th>
+        <th>Last reminded</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each dues}}
+      <tr>
+        <td><a href="/admin/societies/{{this.id}}">{{this.name}}</a></td>
+        <td>{{this.count}} {{#if (eq this.count 1)}}bill{{else}}bills{{/if}}</td>
+        <td>
+          {{#if this.overdueDays}}<span class="badge bad">{{this.overdueDays}}d overdue</span>
+          {{else}}<span class="muted">not due yet</span>{{/if}}
+        </td>
+        <td>₹{{this.amount}}</td>
+        <td class="muted">{{#if this.remindedAgo}}{{this.remindedAgo}}{{else}}never{{/if}}</td>
+        <td style="text-align:right">
+          <form method="post" action="/admin/payments/remind/{{this.id}}" style="display:inline">
+            <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
+            <button class="btn ghost small" type="submit">Send reminder</button>
+          </form>
+        </td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>
+{{/if}}
+
+<h2 class="col-head" style="margin-top:26px">All bills</h2>
+<div class="muted" style="font-size:13px; margin:6px 2px 12px">
+  {{count}} {{#if (eq count 1)}}bill{{else}}bills{{/if}}{{#if filtered}} matching this filter ·
+  <a href="/admin/payments">Clear filters</a>{{/if}}
+</div>
+
+<div class="card has-filters">
+  <table>
+    <thead>
+      <tr>
+        <th>Society {{> colpicker filters.society}}</th>
+        <th>Flat</th>
+        <th>Type {{> colfilter filters.kind}}</th>
+        <th>Amount</th>
+        <th>Status {{> colfilter filters.status}}</th>
+        <th>Due</th>
+        <th>Paid on</th>
+      </tr>
+    </thead>
     <tbody>
       {{#each payments}}
       <tr>
         <td>{{this.society}}</td>
         <td>{{this.flat}}</td>
-        <td>{{this.kind}}</td>
+        <td>{{this.kind}}{{#if this.title}} <span class="muted">· {{this.title}}</span>{{/if}}</td>
         <td>₹{{this.amount}}</td>
+        <td>{{#if this.paid}}<span class="badge ok">Paid</span>{{else}}<span class="badge free">Unpaid</span>{{/if}}</td>
+        <td class="muted">{{this.due}}</td>
         <td class="muted">{{this.paidAt}}</td>
-        <td>
-          <form method="post" action="/admin/payments/{{this.id}}/refund" onsubmit="return confirm('Refund this payment? The bill goes back to unpaid.')">
-            <button class="btn ghost small" type="submit">Refund</button>
-          </form>
-        </td>
       </tr>
       {{/each}}
-      {{#unless payments}}<tr><td colspan="6" class="muted">No payments yet.</td></tr>{{/unless}}
+      {{#unless payments}}<tr><td colspan="7" class="muted">No bills match this filter.</td></tr>{{/unless}}
     </tbody>
   </table>
 </div>
+{{> pager pager}}
 {{> footer}}

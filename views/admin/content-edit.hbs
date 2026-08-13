@@ -1,22 +1,57 @@
 {{> header}}
-<a class="back" href="/admin/content">← Content</a>
-<h1 style="margin-top:8px">{{p.title}}</h1>
-<div class="sub">This shows live in the app — no update needed</div>
+<a class="back" href="/admin/content">← All pages</a>
+<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-top:8px">
+  <div>
+    <h1>{{p.title}}</h1>
+    <div class="sub">
+      Shows live in the app — no update needed ·
+      {{#if p.empty}}<span class="badge free">Empty</span>{{else}}<span class="badge ok">Published</span> · {{p.words}} words{{/if}}
+      · updated {{p.updated}}
+    </div>
+  </div>
+</div>
 
-{{#if ok}}<div class="card" style="padding:14px 18px; margin-bottom:16px; color:#2e7d32">✓ Saved.</div>{{/if}}
+{{#if ok}}<div class="card" style="padding:14px 18px; margin-bottom:16px; color:#2e7d32">✓ Saved. The app shows it on the next open.</div>{{/if}}
 
-<div class="card" style="padding:20px; max-width:760px">
+<div class="card" style="padding:20px">
   <form method="post" action="/admin/content/{{p.key}}" style="display:grid; gap:14px">
+    <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
     <div>
       <label class="muted" style="font-size:13px">Title</label>
       <input type="text" name="title" value="{{p.title}}" style="margin-top:6px" />
     </div>
     <div>
       <label class="muted" style="font-size:13px">Content</label>
-      <textarea name="body" rows="16"
-        style="width:100%; padding:12px; border:1px solid var(--line); border-radius:9px; font-size:14px; font-family:inherit; line-height:1.5; margin-top:6px">{{p.body}}</textarea>
+      <textarea name="body" rows="22" class="content-body">{{p.body}}</textarea>
     </div>
-    <button class="btn primary" type="submit" style="justify-self:start">Save</button>
+    <div class="row-actions">
+      <button class="btn primary" type="submit">Save</button>
+      <a class="btn ghost" href="/admin/content">Cancel</a>
+    </div>
   </form>
+</div>
+
+{{!-- The app renders plain text with a few rules; without saying so here, the
+      only way to learn them is to guess. --}}
+<h2 style="margin-top:24px">How this text is shown in the app</h2>
+<div class="card" style="padding:18px 20px">
+  <ul class="format-help">
+    <li><strong>Blank line</strong> starts a new paragraph. Line breaks inside a
+      paragraph are ignored, so you can wrap text however you like.</li>
+    <li>A <strong>short line without a full stop</strong>, followed by more text,
+      becomes a bold heading for that paragraph.</li>
+    <li>Lines starting with <strong>- </strong> become a bullet list.</li>
+    {{#if isFaq}}
+    <li>Lines starting with <strong>1.</strong>, <strong>2.</strong> … become
+      expandable questions. Everything under a number is that question's answer,
+      and text above the first number stays as an intro.</li>
+    {{else}}
+    <li>Numbered lines (<strong>1.</strong>, <strong>2.</strong> …) stay as
+      ordinary numbered sections. Only the FAQ page folds them into expandable
+      questions.</li>
+    {{/if}}
+    <li>There is no bold or italic markup — <strong>**stars**</strong> would show
+      as stars.</li>
+  </ul>
 </div>
 {{> footer}}

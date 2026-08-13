@@ -13,11 +13,14 @@ const CONTENT = [
   { key: 'contact', title: 'Contact Us', body: 'Contact details will appear here.' },
 ];
 
+// Keys are contract: the API gates its modules on them (@RequiresFeature) and
+// the app hides the matching entry points. Renaming one silently turns its
+// switch back on, so add rather than rename.
 const FLAGS = [
-  { key: 'amenities', label: 'Amenity Booking' },
+  { key: 'amenities', label: 'Amenity booking' },
   { key: 'complaints', label: 'Complaints' },
-  { key: 'visitors', label: 'Visitor Management' },
-  { key: 'payments', label: 'Bill Payments' },
+  { key: 'visitors', label: 'Visitor management' },
+  { key: 'online_payments', label: 'Online payments' },
 ];
 
 async function main() {

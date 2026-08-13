@@ -15,6 +15,7 @@
         <td class="muted">{{this.expires}}</td>
         <td>
           <form method="post" action="/admin/subscriptions/{{this.id}}" style="display:flex; gap:8px">
+            <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
             <select name="plan">
               <option value="FREE" {{#if this.isFree}}selected{{/if}}>Free</option>
               <option value="PREMIUM_MONTHLY" {{#if this.isMonthly}}selected{{/if}}>Premium · Monthly</option>
@@ -29,4 +30,5 @@
     </tbody>
   </table>
 </div>
+{{> pager pager}}
 {{> footer}}

@@ -10,8 +10,15 @@
   <div class="login-wrap">
     <div class="brand">Nestora <span>Admin</span></div>
     <p>Super-admin panel</p>
-    {{#if error}}<div class="login-err">Wrong email or password.</div>{{/if}}
+    {{#if locked}}
+      <div class="login-err">
+        Too many failed attempts. Try again in {{locked}} minute{{#unless (eq locked '1')}}s{{/unless}}.
+      </div>
+    {{else}}
+      {{#if error}}<div class="login-err">Wrong email or password.</div>{{/if}}
+    {{/if}}
     <form method="post" action="/admin/login">
+      <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
       <label>Email</label>
       <input type="email" name="email" placeholder="admin@nestora.app" autofocus />
       <label>Password</label>

@@ -1,0 +1,14 @@
+{{#if show}}
+<div class="pager">
+  <span class="muted">Showing {{from}}–{{to}} of {{total}}</span>
+  <span class="pager-links">
+    {{#if hasPrev}}
+      <a class="btn ghost small" href="{{prevUrl}}">← Previous</a>
+    {{/if}}
+    <span class="muted">Page {{page}} of {{pages}}</span>
+    {{#if hasNext}}
+      <a class="btn ghost small" href="{{nextUrl}}">Next →</a>
+    {{/if}}
+  </span>
+</div>
+{{/if}}

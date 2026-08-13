@@ -5,9 +5,10 @@
 <div class="card" style="padding:18px 20px; margin-bottom:20px">
   <h2 style="margin:0 0 12px">Add super-admin</h2>
   <form method="post" action="/admin/admins" style="display:grid; gap:10px; max-width:420px">
+    <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
     <input type="text" name="name" placeholder="Name" required />
     <input type="email" name="email" placeholder="email@nestora.app" required />
-    <input type="password" name="password" placeholder="Password (min 4 chars)" required />
+    <input type="password" name="password" placeholder="Password (min 8 characters)" minlength="8" required />
     <button class="btn primary" type="submit" style="justify-self:start">Add</button>
   </form>
 </div>
@@ -22,6 +23,7 @@
         <td>{{this.email}}</td>
         <td>
           <form method="post" action="/admin/admins/{{this.id}}/delete" onsubmit="return confirm('Remove this super-admin?')">
+            <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
             <button class="btn danger small" type="submit">Remove</button>
           </form>
         </td>
@@ -30,4 +32,5 @@
     </tbody>
   </table>
 </div>
+{{> pager pager}}
 {{> footer}}

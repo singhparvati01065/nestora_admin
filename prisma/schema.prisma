@@ -79,6 +79,7 @@ model User {
   /// Complaint categories a maintenance staff handles (Plumbing, Electrical…).
   /// A complaint is offered to every staff whose trades include its category.
   trades      String[] @default([])
+  devices     DeviceToken[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -93,8 +94,9 @@ model Society {
   id        String   @id @default(cuid())
   name      String
   address   String
-  /// City / state — filled by the super-admin panel (the app collects a single
-  /// free-text address).
+  /// City / state, asked for in the app's society setup (alongside the
+  /// free-text address) and editable from the super-admin panel. Null on
+  /// societies created before the app collected them.
   city      String?
   state     String?
   /// Relative URL of the uploaded logo. Null = the UI falls back to the
@@ -213,6 +215,10 @@ model Notice {
   title     String
   body      String
   pinned    Boolean  @default(false)
+  /// True for an announcement broadcast from the super-admin panel. It looks
+  /// the same on the board but is labelled as Nestora's, and the society admin
+  /// cannot pin or delete it — only the super admin can.
+  fromPlatform Boolean @default(false)
   createdAt DateTime @default(now())
 }
 
@@ -233,6 +239,25 @@ model SupportTicket {
   status    TicketStatus @default(OPEN)
   assignee  String?
   createdAt DateTime     @default(now())
+  replies   TicketReply[]
+}
+
+/// A reply on a support ticket. Written by the super-admin panel and read by
+/// the society admin in the app, so a ticket is a conversation rather than a
+/// message into the void.
+model TicketReply {
+  id        String        @id @default(cuid())
+  ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  ticketId  String
+  body      String
+  /// Who wrote it, for display — e.g. the super admin's name.
+  author    String
+  /// True for a reply written in the super-admin panel, false for the society
+  /// admin answering from the app. Decides which side of the thread it sits on.
+  fromSupport Boolean     @default(true)
+  createdAt DateTime      @default(now())
+
+  @@index([ticketId])
 }
 
 /// A notification the super-admin sent from the panel's Notification Center.
@@ -249,6 +274,22 @@ model PlatformNotification {
 }
 
 /// One row per successful login — powers the panel's login analytics.
+/// A device's FCM token. One row per install: the same user on two phones has
+/// two, and a phone handed to another user moves the row rather than keeping a
+/// stale one, since the token is unique.
+model DeviceToken {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  token     String   @unique
+  /// 'android' | 'ios' — only for support, delivery does not branch on it.
+  platform  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
 model LoginEvent {
   id        String   @id @default(cuid())
   userId    String?

@@ -1,6 +1,11 @@
 {{> header}}
-<h1>Audit Log</h1>
-<div class="sub">Actions taken in this panel</div>
+<div style="display:flex; justify-content:space-between; align-items:center">
+  <div>
+    <h1>Audit Log</h1>
+    <div class="sub">Actions taken in this panel</div>
+  </div>
+  <a class="btn ghost small" href="/admin/export/audit.csv">Export CSV</a>
+</div>
 
 <div class="card">
   <table>
@@ -18,4 +23,5 @@
     </tbody>
   </table>
 </div>
+{{> pager pager}}
 {{> footer}}

@@ -7,12 +7,23 @@
   <a class="btn ghost small" href="/admin/export/societies.csv">Export CSV</a>
 </div>
 
-<div class="card" style="overflow-x:auto">
+<div class="muted" style="font-size:13px; margin:0 2px 12px">
+  {{total}} {{#if (eq total 1)}}society{{else}}societies{{/if}}{{#if filtered}} matching this filter ·
+  <a href="/admin/societies">Clear filters</a>{{/if}}
+</div>
+
+<div class="card has-filters">
   <table>
     <thead>
       <tr>
-        <th>Logo</th><th>Society</th><th>City</th><th>State</th>
-        <th>Admin</th><th>Contact</th><th>Plan</th><th>Status</th>
+        <th>Logo</th>
+        <th>Society {{> colpicker filters.name}}</th>
+        <th>City {{> colpicker filters.city}}</th>
+        <th>State {{> colpicker filters.state}}</th>
+        <th>Admin name {{> colsearch filters.admin}}</th>
+        <th>Contact {{> colsearch filters.contact}}</th>
+        <th>Plan {{> colfilter filters.plan}}</th>
+        <th>Status {{> colfilter filters.status}}</th>
         <th>Created</th><th>Actions</th>
       </tr>
     </thead>
@@ -36,27 +47,26 @@
         <td class="muted" style="white-space:nowrap">{{this.created}}</td>
         <td>
           <div class="row-actions">
-            <a class="btn ghost small" href="/admin/societies/{{this.id}}">View</a>
-            <a class="btn ghost small" href="/admin/societies/{{this.id}}#edit">Edit</a>
+            {{!-- One link: the society page is both the view and the edit
+                  form, so a separate "Edit" only anchored to the same page. --}}
+            <a class="btn ghost small" href="/admin/societies/{{this.id}}">Open</a>
             <form method="post" action="/admin/societies/{{this.id}}/suspend">
+              <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
               {{#if this.suspended}}
                 <button class="btn ghost small" type="submit">Activate</button>
               {{else}}
                 <button class="btn ghost small" type="submit">Suspend</button>
               {{/if}}
             </form>
-            <form method="post" action="/admin/societies/{{this.id}}/impersonate">
-              <button class="btn primary small" type="submit">Login as</button>
-            </form>
-            <form method="post" action="/admin/societies/{{this.id}}/delete" onsubmit="return confirm('Delete this society and ALL its data?')">
-              <button class="btn danger small" type="submit">Delete</button>
-            </form>
+            {{!-- Deletion lives on the society page, where it asks for the
+                  name to be typed. One click in a list is too easy. --}}
           </div>
         </td>
       </tr>
       {{/each}}
-      {{#unless societies}}<tr><td colspan="10" class="muted">No societies yet.</td></tr>{{/unless}}
+      {{#unless societies}}<tr><td colspan="10" class="muted">No societies match this filter.</td></tr>{{/unless}}
     </tbody>
   </table>
 </div>
+{{> pager pager}}
 {{> footer}}

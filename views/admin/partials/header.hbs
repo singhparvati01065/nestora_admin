@@ -12,7 +12,9 @@
     <nav>
       <a href="/admin" class="{{#if (eq page 'dashboard')}}active{{/if}}">Dashboard</a>
       <a href="/admin/societies" class="{{#if (eq page 'societies')}}active{{/if}}">Societies</a>
-      <a href="/admin/admins" class="{{#if (eq page 'admins')}}active{{/if}}">Society Admins</a>
+      {{!-- This page manages panel logins (SUPER_ADMIN), not society admins —
+            those live under Users and on each society's page. --}}
+      <a href="/admin/admins" class="{{#if (eq page 'admins')}}active{{/if}}">Super Admins</a>
       <a href="/admin/users" class="{{#if (eq page 'users')}}active{{/if}}">Users</a>
       <a href="/admin/subscriptions" class="{{#if (eq page 'subscriptions')}}active{{/if}}">Subscriptions</a>
       <a href="/admin/payments" class="{{#if (eq page 'payments')}}active{{/if}}">Payments</a>
@@ -27,6 +29,12 @@
       <a href="/admin/app-version" class="{{#if (eq page 'appversion')}}active{{/if}}">App Version</a>
       <a href="/admin/settings" class="{{#if (eq page 'settings')}}active{{/if}}">Settings</a>
     </nav>
-    <a class="logout" href="/admin/logout">Log out</a>
+    {{!-- A POST, not a link: a plain GET could be triggered by any page that
+          embeds it, and signing someone out should be deliberate. --}}
+    <form method="post" action="/admin/logout" class="logout-form"
+          onsubmit="return confirm('Log out of the admin panel?')">
+      <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
+      <button class="logout" type="submit">Log out</button>
+    </form>
   </aside>
   <main class="content">

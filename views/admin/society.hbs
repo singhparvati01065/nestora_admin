@@ -1,13 +1,23 @@
 {{> header}}
 <a class="back" href="/admin/societies">← Societies</a>
-<h1 style="margin-top:8px">{{s.name}}</h1>
-<div class="sub">{{s.address}} · created {{s.created}}</div>
+<div class="society-head">
+  {{#if s.logo}}
+    <img src="{{s.logo}}" class="society-logo" alt="" />
+  {{else}}
+    <span class="society-logo is-fallback">{{s.initial}}</span>
+  {{/if}}
+  <div>
+    <h1>{{s.name}}</h1>
+    <div class="sub">{{s.address}} · created {{s.created}}</div>
+  </div>
+</div>
 
 <div class="detail-grid">
   <div class="stat"><div class="num">{{s.flats}}</div><div class="label">Flats</div></div>
-  <div class="stat"><div class="num">{{residents.length}}</div><div class="label">Residents</div></div>
-  <div class="stat"><div class="num">{{bills.length}}</div><div class="label">Bills</div></div>
-  <div class="stat"><div class="num">{{complaints.length}}</div><div class="label">Complaints</div></div>
+  <div class="stat"><div class="num">{{s.residents}}</div><div class="label">Residents</div></div>
+  <div class="stat"><div class="num">{{s.staff}}</div><div class="label">Staff</div></div>
+  <div class="stat"><div class="num">{{s.bills}}</div><div class="label">Bills</div></div>
+  <div class="stat"><div class="num">{{s.complaints}}</div><div class="label">Complaints</div></div>
 </div>
 
 <div class="card" style="padding:18px 20px; margin-bottom:20px">
@@ -23,6 +33,7 @@
 <h2 id="edit">Edit details</h2>
 <div class="card" style="padding:18px 20px; margin-bottom:20px">
   <form method="post" action="/admin/societies/{{s.id}}/edit">
+    <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
     <label class="muted" style="font-size:13px">Name</label>
     <input type="text" name="name" value="{{s.name}}" style="margin:6px 0 12px" />
     <label class="muted" style="font-size:13px">Address</label>
@@ -52,6 +63,25 @@
   </table>
 </div>
 
+<h2>Staff <span class="muted" style="font-size:14px; font-weight:400">· {{s.guards}} security, {{s.maintenance}} maintenance</span></h2>
+<div class="card">
+  <table>
+    <thead><tr><th>Name</th><th>Role</th><th>Trades</th><th>Phone</th><th>Status</th></tr></thead>
+    <tbody>
+      {{#each staff}}
+      <tr>
+        <td>{{this.name}}</td>
+        <td>{{this.role}}</td>
+        <td class="muted">{{#if this.trades}}{{this.trades}}{{else}}—{{/if}}</td>
+        <td class="muted">{{this.phone}}</td>
+        <td>{{#if this.banned}}<span class="badge bad">Blocked</span>{{else}}<span class="badge ok">Active</span>{{/if}}</td>
+      </tr>
+      {{/each}}
+      {{#unless staff}}<tr><td colspan="5" class="muted">No guards or maintenance staff added.</td></tr>{{/unless}}
+    </tbody>
+  </table>
+</div>
+
 <h2>Residents</h2>
 <div class="card">
   <table>
@@ -62,6 +92,7 @@
     </tbody>
   </table>
 </div>
+{{#if residentsTruncated}}<div class="muted" style="font-size:13px; margin:6px 2px">Showing the latest 50.</div>{{/if}}
 
 <h2>Bills</h2>
 <div class="card">
@@ -78,6 +109,7 @@
     </tbody>
   </table>
 </div>
+{{#if billsTruncated}}<div class="muted" style="font-size:13px; margin:6px 2px">Showing the latest 50.</div>{{/if}}
 
 <h2>Complaints</h2>
 <div class="card">
@@ -89,13 +121,33 @@
     </tbody>
   </table>
 </div>
+{{#if complaintsTruncated}}<div class="muted" style="font-size:13px; margin:6px 2px">Showing the latest 50.</div>{{/if}}
 
 <h2>Actions</h2>
 <div class="row-actions">
   <form method="post" action="/admin/societies/{{s.id}}/suspend">
+    <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
     <button class="btn ghost" type="submit">{{#if s.suspended}}Un-suspend{{else}}Suspend{{/if}}</button>
   </form>
-  <form method="post" action="/admin/societies/{{s.id}}/delete" onsubmit="return confirm('Delete this society and ALL its data? This cannot be undone.')">
+</div>
+
+<h2 style="margin-top:26px">Danger zone</h2>
+<div class="card" style="padding:18px 20px">
+  <p class="muted" style="margin-top:0">
+    Deleting <strong>{{s.name}}</strong> also deletes its flats, residents,
+    bills, complaints and visitor history. This cannot be undone.
+  </p>
+  {{#if confirmError}}
+    <p style="color:#c0392b; margin:0 0 10px">
+      The name did not match — nothing was deleted.
+    </p>
+  {{/if}}
+  <form method="post" action="/admin/societies/{{s.id}}/delete"
+        style="display:flex; gap:8px; flex-wrap:wrap; align-items:center"
+        onsubmit="return confirm('Delete this society and ALL its data? This cannot be undone.')">
+    <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
+    <input type="text" name="confirm" required autocomplete="off"
+           placeholder="Type “{{s.name}}” to confirm" style="max-width:320px" />
     <button class="btn danger" type="submit">Delete society</button>
   </form>
 </div>

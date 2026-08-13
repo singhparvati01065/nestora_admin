@@ -1,20 +1,44 @@
 {{> header}}
 <h1>Content (CMS)</h1>
-<div class="sub">Edit app pages without shipping an update</div>
+<div class="sub">
+  The app's Help &amp; Legal pages. Edit them here and they change in the app —
+  no update, no review.
+</div>
 
-<div class="card">
-  <table>
-    <thead><tr><th>Page</th><th>Status</th><th>Last updated</th><th></th></tr></thead>
-    <tbody>
-      {{#each pages}}
-      <tr>
-        <td><a class="rowlink" href="/admin/content/{{this.key}}">{{this.title}}</a></td>
-        <td>{{#if this.empty}}<span class="badge free">Empty</span>{{else}}<span class="badge ok">Published</span>{{/if}}</td>
-        <td class="muted">{{this.updated}}</td>
-        <td><a class="btn ghost small" href="/admin/content/{{this.key}}">Edit</a></td>
-      </tr>
-      {{/each}}
-    </tbody>
-  </table>
+{{!-- An empty page is a blank screen for whoever taps it, so it is worth
+      saying out loud rather than leaving it to the badges below. --}}
+{{#if emptyCount}}
+<div class="card" style="padding:14px 18px; margin-bottom:16px">
+  <strong>{{emptyCount}}</strong> page{{#unless (eq emptyCount 1)}}s{{/unless}}
+  still empty — anyone who opens {{#if (eq emptyCount 1)}}it{{else}}them{{/if}}
+  in the app sees “Nothing here yet.”
+</div>
+{{/if}}
+
+<div class="cms-grid">
+  {{#each pages}}
+  <a class="cms-page{{#if this.empty}} is-empty{{/if}}" href="/admin/content/{{this.key}}">
+    <span class="cms-icon">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+        <path d="{{this.iconPath}}" fill="none" stroke="currentColor"
+              stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </span>
+    <div class="cms-title">{{this.title}}</div>
+    <div>
+      {{#if this.empty}}
+        <span class="badge free">Empty</span>
+      {{else}}
+        <span class="badge ok">Published</span>
+      {{/if}}
+    </div>
+    <div class="cms-preview">
+      {{#if this.preview}}{{this.preview}}…{{else}}Nothing written yet.{{/if}}
+    </div>
+    <div class="cms-foot">
+      <span class="muted">{{#if this.words}}{{this.words}} words · {{/if}}{{this.updated}}</span>
+    </div>
+  </a>
+  {{/each}}
 </div>
 {{> footer}}

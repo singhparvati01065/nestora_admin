@@ -1,44 +1,123 @@
 {{> header}}
-<h1>App Version Management</h1>
-<div class="sub">Control update prompts shown in the mobile app · last updated {{cfg.updated}}</div>
+<h1>App Version</h1>
+<div class="sub">
+  What the app checks on every launch to decide whether to prompt for an update
+</div>
 
-{{#if ok}}<div class="card" style="padding:14px 18px; margin-bottom:16px; color:#2e7d32">✓ Saved.</div>{{/if}}
+{{#if ok}}<div class="card" style="padding:14px 18px; margin-bottom:16px; color:#2e7d32">✓ Saved. Apps pick this up the next time they open.</div>{{/if}}
 
-<div class="card" style="padding:22px; max-width:620px">
-  <form method="post" action="/admin/app-version" style="display:grid; gap:16px">
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px">
+{{!-- What the app is being told right now, before any edit below. --}}
+<div class="stats" style="margin-bottom:8px">
+  <div class="stat">
+    <div class="num">{{cfg.androidVersion}}</div>
+    <div class="label">Android — latest</div>
+  </div>
+  <div class="stat">
+    <div class="num">{{cfg.iosVersion}}</div>
+    <div class="label">iOS — latest</div>
+  </div>
+  <div class="stat">
+    <div class="num" style="font-size:20px">
+      {{#if cfg.forceUpdate}}<span class="badge bad">Force</span>{{else}}<span class="badge ok">Optional</span>{{/if}}
+    </div>
+    <div class="label">Update type</div>
+  </div>
+  <div class="stat">
+    <div class="num" style="font-size:20px">
+      {{#if maintenanceMode}}<span class="badge bad">On</span>{{else}}<span class="badge ok">Off</span>{{/if}}
+    </div>
+    <div class="label">Maintenance mode</div>
+  </div>
+</div>
+<div class="muted" style="font-size:12px; margin:0 2px 20px">
+  Served at <code>{{apiUrl}}</code> · last changed {{cfg.updated}} ·
+  maintenance mode is set under <a href="/admin/settings">Settings</a>
+</div>
+
+{{#if maintenanceMode}}
+<div class="card" style="padding:14px 18px; margin-bottom:16px; border-color:#c0392b">
+  <strong>Maintenance mode is on.</strong> The app shows a blocking “Under
+  maintenance” screen and nobody gets past it — the version settings below do
+  not matter until it is switched off.
+</div>
+{{/if}}
+
+<h2 class="col-head">Update settings</h2>
+<div class="card" style="padding:22px">
+  <form method="post" action="/admin/app-version" style="display:grid; gap:18px">
+    <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; max-width:520px">
       <div>
-        <label class="muted" style="font-size:13px">Current Android Version</label>
-        <input type="text" name="androidVersion" value="{{cfg.androidVersion}}" placeholder="1.2.0" style="margin-top:6px" />
+        <label class="muted" style="font-size:13px">Latest Android version</label>
+        <input type="text" name="androidVersion" value="{{cfg.androidVersion}}"
+               placeholder="1.2.0" pattern="[0-9]+\.[0-9]+\.[0-9]+"
+               title="Three numbers, like 1.2.0" style="margin-top:6px" />
       </div>
       <div>
-        <label class="muted" style="font-size:13px">Current iOS Version</label>
-        <input type="text" name="iosVersion" value="{{cfg.iosVersion}}" placeholder="1.2.0" style="margin-top:6px" />
+        <label class="muted" style="font-size:13px">Latest iOS version</label>
+        <input type="text" name="iosVersion" value="{{cfg.iosVersion}}"
+               placeholder="1.2.0" pattern="[0-9]+\.[0-9]+\.[0-9]+"
+               title="Three numbers, like 1.2.0" style="margin-top:6px" />
       </div>
+    </div>
+    <div class="muted" style="font-size:12px; margin-top:-8px">
+      A phone running an older version than this is asked to update. Set it to
+      the build that is actually live on the store, not the one you are testing.
     </div>
 
     <div>
       <label class="muted" style="font-size:13px">Update type</label>
-      <div style="display:flex; gap:18px; margin-top:8px">
+      <div style="display:flex; gap:18px; margin-top:8px; flex-wrap:wrap">
         <label style="display:flex; align-items:center; gap:6px; font-size:14px; cursor:pointer">
-          <input type="radio" name="updateType" value="optional" {{#unless cfg.forceUpdate}}checked{{/unless}} /> Optional Update
+          <input type="radio" name="updateType" value="optional" {{#unless cfg.forceUpdate}}checked{{/unless}} /> Optional
         </label>
         <label style="display:flex; align-items:center; gap:6px; font-size:14px; cursor:pointer">
-          <input type="radio" name="updateType" value="force" {{#if cfg.forceUpdate}}checked{{/if}} /> Force Update
+          <input type="radio" name="updateType" value="force" {{#if cfg.forceUpdate}}checked{{/if}} /> Force
         </label>
       </div>
       <div class="muted" style="font-size:12px; margin-top:6px">
-        Force = users on an older version must update before using the app. Optional = a dismissible prompt.
+        Optional shows a prompt with a “Later” button. Force locks the app until
+        the update is installed — only use it when an older build is genuinely
+        broken, and only after the new build is live on both stores.
       </div>
     </div>
 
     <div>
-      <label class="muted" style="font-size:13px">Release Notes</label>
-      <textarea name="releaseNotes" rows="5" placeholder="What's new in this version…"
-        style="width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:9px; font-size:14px; font-family:inherit; margin-top:6px">{{cfg.releaseNotes}}</textarea>
+      <label class="muted" style="font-size:13px">Release notes</label>
+      <textarea name="releaseNotes" rows="5" class="content-body"
+                placeholder="What's new in this version…">{{cfg.releaseNotes}}</textarea>
+      <div class="muted" style="font-size:12px; margin-top:4px">
+        Shown under “What's new” in the update prompt. Leave blank to hide it.
+      </div>
     </div>
 
     <button class="btn primary" type="submit" style="justify-self:start">Save</button>
   </form>
+</div>
+
+{{!-- The wording here mirrors app_version.dart, so what is written above can be
+      checked against what a user actually sees. --}}
+<h2 class="col-head" style="margin-top:24px">What the user sees</h2>
+<div class="card phone-preview">
+  <div class="phone-dialog">
+    <div class="phone-title">
+      {{#if cfg.forceUpdate}}Update required{{else}}Update available{{/if}}
+    </div>
+    <div class="phone-body">
+      {{#if cfg.forceUpdate}}
+        A newer version ({{cfg.androidVersion}}) is required to keep using Nestora.
+      {{else}}
+        Nestora {{cfg.androidVersion}} is available.
+      {{/if}}
+    </div>
+    {{#if cfg.releaseNotes}}
+    <div class="phone-notes-label">What's new</div>
+    <div class="phone-body">{{cfg.releaseNotes}}</div>
+    {{/if}}
+    <div class="phone-actions">
+      {{#unless cfg.forceUpdate}}<span class="phone-btn ghost">Later</span>{{/unless}}
+      <span class="phone-btn">Update</span>
+    </div>
+  </div>
 </div>
 {{> footer}}

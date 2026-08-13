@@ -11,7 +11,7 @@
 
 <div class="card">
   <table>
-    <thead><tr><th>Title</th><th>Category</th><th>Society</th><th>Flat</th><th>Status</th><th>Date</th></tr></thead>
+    <thead><tr><th>Title</th><th>Category</th><th>Society</th><th>Flat</th><th>Status</th><th>Assigned to</th><th>Date</th></tr></thead>
     <tbody>
       {{#each complaints}}
       <tr>
@@ -19,12 +19,32 @@
         <td>{{this.category}}</td>
         <td class="muted">{{this.society}}</td>
         <td>{{this.flat}}</td>
-        <td>{{this.status}}</td>
+        <td>
+          <form method="post" action="/admin/complaints/{{this.id}}/status">
+            <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
+            <input type="hidden" name="back" value="{{@root.pager.selfUrl}}" />
+            <select name="status" onchange="this.form.submit()">
+              <option value="OPEN" {{#if this.isOpen}}selected{{/if}}>Open</option>
+              <option value="IN_PROGRESS" {{#if this.isInProgress}}selected{{/if}}>In progress</option>
+              <option value="RESOLVED" {{#if this.isResolved}}selected{{/if}}>Resolved</option>
+            </select>
+          </form>
+        </td>
+        <td>
+          <form method="post" action="/admin/complaints/{{this.id}}/assign" style="display:flex; gap:6px">
+            <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
+            <input type="hidden" name="back" value="{{@root.pager.selfUrl}}" />
+            <input type="text" name="assignedTo" value="{{this.assignedTo}}"
+                   placeholder="Unassigned" style="max-width:160px" />
+            <button class="btn ghost small" type="submit">Save</button>
+          </form>
+        </td>
         <td class="muted">{{this.created}}</td>
       </tr>
       {{/each}}
-      {{#unless complaints}}<tr><td colspan="6" class="muted">No complaints.</td></tr>{{/unless}}
+      {{#unless complaints}}<tr><td colspan="7" class="muted">No complaints.</td></tr>{{/unless}}
     </tbody>
   </table>
 </div>
+{{> pager pager}}
 {{> footer}}

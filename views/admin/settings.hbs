@@ -1,55 +1,87 @@
 {{> header}}
 <h1>Settings</h1>
-<div class="sub">Platform configuration</div>
+<div class="sub">Platform-wide configuration</div>
 
 {{#if saved}}<div class="card" style="padding:14px 18px; margin-bottom:16px; color:#2e7d32">✓ Settings saved.</div>{{/if}}
 {{#if ok}}<div class="card" style="padding:14px 18px; margin-bottom:16px; color:#2e7d32">✓ Password changed.</div>{{/if}}
-{{#if error}}<div class="card" style="padding:14px 18px; margin-bottom:16px; color:#d32f2f">Current password is wrong, or new password too short.</div>{{/if}}
+{{#if error}}<div class="card" style="padding:14px 18px; margin-bottom:16px; color:#d32f2f">Current password is wrong, or the new one is too short.</div>{{/if}}
 
-<div class="card" style="padding:22px; max-width:680px; margin-bottom:24px">
+{{!-- The one switch that can stop every app in every society gets its own
+      card, rather than sitting inside a form about logos and languages. --}}
+<h2 class="col-head">Maintenance mode</h2>
+<div class="card settings-card{{#if s.maintenanceMode}} is-danger{{/if}}">
+  <div class="settings-row">
+    <div>
+      <div class="settings-title">
+        {{#if s.maintenanceMode}}
+          <span class="badge bad">ON</span> The app is blocked for everyone
+        {{else}}
+          <span class="badge ok">OFF</span> The app is running normally
+        {{/if}}
+      </div>
+      <div class="muted" style="font-size:13px; margin-top:6px; max-width:640px">
+        With this on, every app — resident, guard, staff and society admin —
+        shows a blocking “Under maintenance” screen on launch and nothing else
+        can be done. Use it for planned downtime, and remember to switch it
+        back off. The app checks it on the same call as
+        <a href="/admin/app-version">App Version</a>.
+      </div>
+    </div>
+    <form method="post" action="/admin/settings/maintenance"
+          onsubmit="return {{#if s.maintenanceMode}}true{{else}}confirm('Turn maintenance mode ON? Every user is locked out of the app until it is turned off.'){{/if}}">
+      <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
+      <input type="hidden" name="on" value="{{#if s.maintenanceMode}}0{{else}}1{{/if}}" />
+      <button class="btn {{#if s.maintenanceMode}}primary{{else}}danger{{/if}}" type="submit">
+        {{#if s.maintenanceMode}}Turn off{{else}}Turn on{{/if}}
+      </button>
+    </form>
+  </div>
+</div>
+
+<h2 class="col-head" style="margin-top:24px">Branding</h2>
+<div class="card settings-card">
   <form method="post" action="/admin/settings/general" style="display:grid; gap:16px">
-    <h2 style="margin:0">General</h2>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px">
+    <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; max-width:560px">
       <div>
-        <label class="muted" style="font-size:13px">App Name</label>
+        <label class="muted" style="font-size:13px">App name</label>
         <input type="text" name="appName" value="{{s.appName}}" style="margin-top:6px" />
       </div>
       <div>
-        <label class="muted" style="font-size:13px">Default Language</label>
+        <label class="muted" style="font-size:13px">Default language</label>
         <input type="text" name="defaultLanguage" value="{{s.defaultLanguage}}" placeholder="en" style="margin-top:6px" />
       </div>
     </div>
-    <div>
+    <div style="max-width:560px">
       <label class="muted" style="font-size:13px">Logo URL</label>
       <input type="text" name="logoUrl" value="{{s.logoUrl}}" placeholder="https://…" style="margin-top:6px" />
     </div>
-    <label style="display:flex; align-items:center; gap:8px; font-size:14px; cursor:pointer">
-      <input type="checkbox" name="maintenanceMode" {{#if s.maintenanceMode}}checked{{/if}} />
-      Maintenance Mode <span class="muted" style="font-size:13px">(app shows an "under maintenance" screen)</span>
-    </label>
-
-    <h2 style="margin:8px 0 0">Integrations</h2>
-    <div class="muted" style="font-size:12px; margin-top:-8px">Keys are stored securely. Connecting them to real services is a separate step.</div>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px">
-      <div><label class="muted" style="font-size:13px">SMTP Host</label><input type="text" name="smtpHost" value="{{s.smtpHost}}" style="margin-top:6px" /></div>
-      <div><label class="muted" style="font-size:13px">SMTP User</label><input type="text" name="smtpUser" value="{{s.smtpUser}}" style="margin-top:6px" /></div>
-      <div><label class="muted" style="font-size:13px">SMTP Password</label><input type="password" name="smtpPass" value="{{s.smtpPass}}" style="margin-top:6px" /></div>
-      <div><label class="muted" style="font-size:13px">Firebase Key</label><input type="text" name="firebaseKey" value="{{s.firebaseKey}}" style="margin-top:6px" /></div>
-      <div><label class="muted" style="font-size:13px">Payment Gateway Key</label><input type="text" name="paymentKey" value="{{s.paymentKey}}" style="margin-top:6px" /></div>
-      <div><label class="muted" style="font-size:13px">WhatsApp API Key</label><input type="text" name="whatsappKey" value="{{s.whatsappKey}}" style="margin-top:6px" /></div>
-      <div><label class="muted" style="font-size:13px">SMS API Key</label><input type="text" name="smsKey" value="{{s.smsKey}}" style="margin-top:6px" /></div>
+    <div class="muted" style="font-size:12px; margin-top:-6px">
+      The app name is returned with the version check and used in update
+      prompts. A society's own logo is set on its society page, not here.
     </div>
-
-    <button class="btn primary" type="submit" style="justify-self:start">Save settings</button>
+    <button class="btn primary" type="submit" style="justify-self:start">Save</button>
   </form>
 </div>
 
-<div class="card" style="padding:20px; max-width:420px">
-  <h2 style="margin:0 0 14px">Change password</h2>
-  <form method="post" action="/admin/settings/password" style="display:grid; gap:12px">
+<h2 class="col-head" style="margin-top:24px">Panel password</h2>
+<div class="card settings-card">
+  <form method="post" action="/admin/settings/password" style="display:grid; gap:12px; max-width:360px">
+    <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
     <input type="password" name="current" placeholder="Current password" required />
-    <input type="password" name="next" placeholder="New password (min 4 chars)" required />
+    <input type="password" name="next" placeholder="New password (min 8 characters)"
+           minlength="8" required />
     <button class="btn primary" type="submit" style="justify-self:start">Update password</button>
   </form>
+  <div class="muted" style="font-size:12px; margin-top:10px">
+    Changes the password of the super admin you are signed in as. Other panel
+    logins are managed under <a href="/admin/admins">Super Admins</a>.
+  </div>
 </div>
+
+{{!-- The old "Integrations" block collected SMTP / payment / WhatsApp keys
+      that nothing read, in plain text. It is gone rather than merely labelled:
+      a field that invites a real secret is worse than no field. When an
+      integration is actually wired up, its credentials belong in the server's
+      environment, the way the Firebase service account does. --}}
 {{> footer}}

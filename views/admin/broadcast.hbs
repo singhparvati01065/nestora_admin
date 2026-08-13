@@ -4,8 +4,12 @@
 
 {{#if sent}}<div class="card" style="padding:14px 18px; margin-bottom:16px; color:#2e7d32">✓ Announcement sent.</div>{{/if}}
 
-<div class="card" style="padding:20px; max-width:620px">
+<div class="broadcast-grid">
+<section>
+<h2 class="col-head">Compose</h2>
+<div class="card" style="padding:20px">
   <form method="post" action="/admin/broadcast" style="display:grid; gap:14px">
+    <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
     <div>
       <label class="muted" style="font-size:13px">Title</label>
       <input type="text" name="title" placeholder="e.g. New Version / Downtime Notice" required style="margin-top:6px" />
@@ -39,6 +43,44 @@
 
     <button class="btn primary" type="submit" style="justify-self:start">Send announcement</button>
   </form>
+</div>
+</section>
+
+<section>
+<h2 class="col-head">
+  Sent
+  {{#if total}}<span class="muted" style="font-weight:400; font-size:14px">· {{total}} total</span>{{/if}}
+</h2>
+{{#if history}}
+<div class="card" style="padding:0">
+  {{#each history}}
+  <div class="sent-item">
+    <div class="sent-head">
+      <div>
+        <div class="sent-title">{{this.title}}</div>
+        <div class="muted" style="font-size:13px">
+          {{this.at}} · {{this.count}} societ{{#if (eq this.count 1)}}y{{else}}ies{{/if}}
+        </div>
+      </div>
+      {{!-- Removing it takes the notice out of every society that got it. --}}
+      <form method="post" action="/admin/broadcast/delete"
+            onsubmit="return confirm('Remove this announcement from every society that received it?')">
+        <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
+        <input type="hidden" name="ids" value="{{this.ids}}" />
+        <input type="hidden" name="title" value="{{this.title}}" />
+        <button class="btn ghost small" type="submit">Remove</button>
+      </form>
+    </div>
+    <div class="sent-body">{{this.body}}</div>
+    <div class="muted" style="font-size:12px; margin-top:6px">{{this.societies}}</div>
+  </div>
+  {{/each}}
+</div>
+{{> pager pager}}
+{{else}}
+<div class="card muted" style="padding:20px">Nothing sent yet.</div>
+{{/if}}
+</section>
 </div>
 
 <script>

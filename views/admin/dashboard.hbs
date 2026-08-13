@@ -2,38 +2,64 @@
 <h1>Dashboard</h1>
 <div class="sub">Platform overview</div>
 
-<div class="stats">
-  <div class="stat"><div class="num">{{stats.totalSocieties}}</div><div class="label">Total Societies</div></div>
-  <div class="stat"><div class="num">{{stats.activeSocieties}}</div><div class="label">Active Societies</div></div>
-  <div class="stat"><div class="num">{{stats.inactiveSocieties}}</div><div class="label">Inactive Societies</div></div>
-  <div class="stat"><div class="num">{{stats.totalResidents}}</div><div class="label">Total Residents</div></div>
-  <div class="stat"><div class="num">{{stats.totalAdmins}}</div><div class="label">Society Admins</div></div>
-  <div class="stat"><div class="num">{{stats.totalGuards}}</div><div class="label">Total Guards</div></div>
-  <div class="stat"><div class="num">{{stats.totalVisitors}}</div><div class="label">Total Visitors</div></div>
-  <div class="stat"><div class="num">{{stats.totalComplaints}}</div><div class="label">Total Complaints</div></div>
-  <div class="stat"><div class="num">₹{{stats.totalRevenue}}</div><div class="label">Total Revenue</div></div>
-  <div class="stat"><div class="num">₹{{stats.totalMaintenance}}</div><div class="label">Maintenance Collected</div></div>
-  <div class="stat"><div class="num">{{stats.newRegistrations}}</div><div class="label">New Registrations (30d)</div></div>
+{{!-- Four numbers worth acting on, then the rest as a quieter strip. Every
+      tile is a link, so a number that looks wrong can be opened. --}}
+<div class="kpi-row">
+  <a class="card kpi" href="/admin/societies">
+    <div class="kpi-num">{{stats.totalSocieties}}</div>
+    <div class="kpi-label">Societies</div>
+    <div class="kpi-sub">{{stats.activeSocieties}} active · {{stats.inactiveSocieties}} suspended</div>
+  </a>
+  <a class="card kpi" href="/admin/users">
+    <div class="kpi-num">{{stats.totalResidents}}</div>
+    <div class="kpi-label">Residents</div>
+    <div class="kpi-sub">{{stats.newRegistrations}} new accounts in 30 days</div>
+  </a>
+  <a class="card kpi" href="/admin/payments?status=paid">
+    <div class="kpi-num">₹{{stats.totalRevenue}}</div>
+    <div class="kpi-label">Collected</div>
+    <div class="kpi-sub">all time · ₹{{stats.totalMaintenance}} maintenance</div>
+  </a>
+  <a class="card kpi is-warning" href="/admin/payments?status=unpaid">
+    <div class="kpi-num">₹{{stats.outstanding}}</div>
+    <div class="kpi-label">Outstanding</div>
+    <div class="kpi-sub">unpaid bills, right now</div>
+  </a>
+</div>
+
+<div class="mini-row">
+  <a class="card mini" href="/admin/users?role=SOCIETY_ADMIN">
+    <span class="mini-num">{{stats.totalAdmins}}</span> Society admins
+  </a>
+  <a class="card mini" href="/admin/users?role=SECURITY_GUARD">
+    <span class="mini-num">{{stats.totalGuards}}</span> Guards
+  </a>
+  <a class="card mini" href="/admin/complaints">
+    <span class="mini-num">{{stats.totalComplaints}}</span> Complaints
+  </a>
+  <span class="card mini">
+    <span class="mini-num">{{stats.totalVisitors}}</span> Visitors logged
+  </span>
 </div>
 
 <div class="chart-row">
   <div class="card chart-card">
-    <h2 style="margin:0 0 12px">Society Growth</h2>
-    <canvas id="growthChart" height="150"></canvas>
+    <h2 style="margin:0 0 12px">Society growth</h2>
+    <div class="chart-box"><canvas id="growthChart"></canvas></div>
   </div>
   <div class="card chart-card">
-    <h2 style="margin:0 0 12px">Active Users</h2>
-    <canvas id="usersChart" height="150"></canvas>
+    <h2 style="margin:0 0 12px">Who is on the platform</h2>
+    <div class="chart-box"><canvas id="usersChart"></canvas></div>
   </div>
 </div>
 <div class="chart-row">
   <div class="card chart-card">
-    <h2 style="margin:0 0 12px">Monthly Revenue</h2>
-    <canvas id="revenueChart" height="150"></canvas>
+    <h2 style="margin:0 0 12px">Collected per month</h2>
+    <div class="chart-box"><canvas id="revenueChart"></canvas></div>
   </div>
   <div class="card chart-card">
-    <h2 style="margin:0 0 12px">Login Analytics (14 days)</h2>
-    <canvas id="loginChart" height="150"></canvas>
+    <h2 style="margin:0 0 12px">Logins (14 days)</h2>
+    <div class="chart-box"><canvas id="loginChart"></canvas></div>
   </div>
 </div>
 
@@ -62,27 +88,71 @@
   const revenue = {{{json revenue}}};
   const activeUsers = {{{json activeUsers}}};
   const loginAnalytics = {{{json loginAnalytics}}};
-  const P = '#6C4AB6';
 
-  new Chart(document.getElementById('growthChart'), {
+  // One purple family across every chart; a second hue would imply a meaning
+  // that isn't there.
+  const P = '#6C4AB6';
+  const SHADES = ['#6C4AB6', '#8b6fd0', '#b39ddb', '#d1c4e9'];
+  const common = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+  };
+
+  /// Draws the chart, or says the period is empty instead of leaving a bare
+  /// grid behind.
+  function draw(id, config, data) {
+    const el = document.getElementById(id);
+    if (!data.some((v) => v > 0)) {
+      el.closest('.chart-box').innerHTML =
+        '<div class="chart-empty">Nothing to show yet</div>';
+      return;
+    }
+    new Chart(el, config);
+  }
+
+  draw('growthChart', {
     type: 'bar',
-    data: { labels: growth.labels, datasets: [{ label: 'New societies', data: growth.data, backgroundColor: P, borderRadius: 6 }] },
-    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
-  });
-  new Chart(document.getElementById('usersChart'), {
+    data: { labels: growth.labels, datasets: [{ data: growth.data, backgroundColor: P, borderRadius: 6 }] },
+    options: { ...common, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } },
+  }, growth.data);
+
+  draw('usersChart', {
     type: 'doughnut',
-    data: { labels: activeUsers.labels, datasets: [{ data: activeUsers.data, backgroundColor: ['#6C4AB6', '#8b6fd0', '#b39ddb', '#d1c4e9'] }] },
-    options: { plugins: { legend: { position: 'bottom' } } }
-  });
-  new Chart(document.getElementById('revenueChart'), {
+    data: { labels: activeUsers.labels, datasets: [{ data: activeUsers.data, backgroundColor: SHADES }] },
+    options: { ...common, plugins: { legend: { position: 'bottom' } } },
+  }, activeUsers.data);
+
+  // Bars, not a smoothed line: months are discrete, and a curve invents
+  // takings between them that never happened.
+  draw('revenueChart', {
+    type: 'bar',
+    data: { labels: revenue.labels, datasets: [{ data: revenue.data, backgroundColor: P, borderRadius: 6 }] },
+    options: {
+      ...common,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { callback: (v) => '₹' + v.toLocaleString() },
+        },
+      },
+    },
+  }, revenue.data);
+
+  draw('loginChart', {
     type: 'line',
-    data: { labels: revenue.labels, datasets: [{ label: 'Revenue ₹', data: revenue.data, borderColor: P, backgroundColor: 'rgba(108,74,182,0.12)', fill: true, tension: 0.35 }] },
-    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-  });
-  new Chart(document.getElementById('loginChart'), {
-    type: 'line',
-    data: { labels: loginAnalytics.labels, datasets: [{ label: 'Logins', data: loginAnalytics.data, borderColor: '#2e7d32', backgroundColor: 'rgba(46,125,50,0.12)', fill: true, tension: 0.35 }] },
-    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
-  });
+    data: {
+      labels: loginAnalytics.labels,
+      datasets: [{
+        data: loginAnalytics.data,
+        borderColor: P,
+        backgroundColor: 'rgba(108,74,182,0.12)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 2,
+      }],
+    },
+    options: { ...common, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } },
+  }, loginAnalytics.data);
 </script>
 {{> footer}}

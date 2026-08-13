@@ -12,6 +12,7 @@
         <td>{{#if this.enabled}}<span class="badge ok">On</span>{{else}}<span class="badge bad">Off</span>{{/if}}</td>
         <td>
           <form method="post" action="/admin/flags/{{this.key}}">
+            <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
             <button class="btn {{#if this.enabled}}ghost{{else}}primary{{/if}} small" type="submit">{{#if this.enabled}}Turn off{{else}}Turn on{{/if}}</button>
           </form>
         </td>

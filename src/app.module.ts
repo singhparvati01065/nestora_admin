@@ -8,6 +8,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { AdminController } from './admin/admin.controller';
 import { AdminAuthMiddleware } from './admin/admin-auth.middleware';
+import { CsrfMiddleware } from './admin/csrf.middleware';
+import { LoginThrottle } from './admin/login-throttle';
 import { PrismaService } from './prisma.service';
 
 @Module({
@@ -22,10 +24,12 @@ import { PrismaService } from './prisma.service';
     }),
   ],
   controllers: [AdminController],
-  providers: [PrismaService],
+  providers: [PrismaService, LoginThrottle],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
+    // Form-token check first, so it also covers the login POST.
+    consumer.apply(CsrfMiddleware).forRoutes(AdminController);
     // Every /admin page needs a session, except the login form itself.
     consumer
       .apply(AdminAuthMiddleware)

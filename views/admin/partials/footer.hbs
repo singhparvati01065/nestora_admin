@@ -1,3 +1,36 @@
   </main>
+  <script>
+    // Live filtering for the picker-style column menus: typing narrows the list
+    // below the box and highlights the part that matched. Delegated from the
+    // document so it covers every menu on the page, opened or not.
+    document.addEventListener('input', function (e) {
+      var box = e.target.closest('.colfilter-picker input[type="search"]');
+      if (!box) return;
+      var menu = box.closest('.colfilter-menu');
+      var term = box.value.trim().toLowerCase();
+      var shown = 0;
+
+      menu.querySelectorAll('a[data-label]').forEach(function (link) {
+        var label = link.getAttribute('data-label');
+        var at = label.toLowerCase().indexOf(term);
+        var hit = !term || at >= 0;
+        link.hidden = !hit;
+        if (hit) shown++;
+
+        // Rebuild with text nodes, never innerHTML — these labels are user data.
+        link.textContent = '';
+        if (!term || at < 0) {
+          link.textContent = label;
+          return;
+        }
+        var mark = document.createElement('mark');
+        mark.textContent = label.slice(at, at + term.length);
+        link.append(label.slice(0, at), mark, label.slice(at + term.length));
+      });
+
+      var empty = menu.querySelector('.colfilter-empty');
+      if (empty) empty.hidden = shown > 0;
+    });
+  </script>
 </body>
 </html>

@@ -1,51 +1,76 @@
 {{> header}}
-<h1>Reports &amp; Analytics</h1>
-<div class="sub">Platform usage and performance</div>
-
-<h2>Active Users</h2>
-<div class="stats">
-  <div class="stat"><div class="num">{{dau}}</div><div class="label">Daily Active Users</div></div>
-  <div class="stat"><div class="num">{{mau}}</div><div class="label">Monthly Active Users</div></div>
+<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px">
+  <div>
+    <h1>Reports &amp; Analytics</h1>
+    <div class="sub">{{range.label}}</div>
+  </div>
+  <a class="btn ghost small" href="{{exportUrl}}">Export CSV</a>
 </div>
 
-<h2>Visitor Analytics</h2>
+{{!-- Presets cover the usual questions; the date pair answers the rest. --}}
+<div class="range-bar">
+  <div class="row-actions">
+    <a class="btn {{#if (eq range.preset '7d')}}primary{{else}}ghost{{/if}} small" href="/admin/reports?preset=7d">Last 7 days</a>
+    <a class="btn {{#if (eq range.preset '30d')}}primary{{else}}ghost{{/if}} small" href="/admin/reports?preset=30d">Last 30 days</a>
+    <a class="btn {{#if (eq range.preset 'month')}}primary{{else}}ghost{{/if}} small" href="/admin/reports?preset=month">This month</a>
+    <a class="btn {{#if (eq range.preset 'lastmonth')}}primary{{else}}ghost{{/if}} small" href="/admin/reports?preset=lastmonth">Last month</a>
+    <a class="btn {{#if (eq range.preset 'all')}}primary{{else}}ghost{{/if}} small" href="/admin/reports?preset=all">All time</a>
+  </div>
+  <form method="get" action="/admin/reports" class="range-form">
+    <input type="date" name="from" value="{{range.from}}" />
+    <span class="muted">to</span>
+    <input type="date" name="to" value="{{range.to}}" />
+    <button class="btn primary small" type="submit">Apply</button>
+  </form>
+</div>
+
+<h2>Activity</h2>
 <div class="stats">
-  <div class="stat"><div class="num">{{visitors.total}}</div><div class="label">Total Visitors</div></div>
+  <div class="stat"><div class="num">{{activeUsers}}</div><div class="label">Active users in window</div></div>
+  <div class="stat"><div class="num">{{dau}}</div><div class="label">Active today</div></div>
+  <div class="stat"><div class="num">{{logins}}</div><div class="label">Logins</div></div>
+  <div class="stat"><div class="num">{{visitors.inRange}}</div><div class="label">Visitors</div></div>
   <div class="stat"><div class="num">{{visitors.inside}}</div><div class="label">Inside now</div></div>
-  <div class="stat"><div class="num">{{visitors.month}}</div><div class="label">This month</div></div>
 </div>
 
-<h2>Complaint Analytics</h2>
+<div class="chart-row" style="margin-top:16px">
+  <div class="card chart-card">
+    <h2 style="margin-top:0">Logins per day</h2>
+    <canvas id="loginChart" height="150"></canvas>
+  </div>
+  <div class="card chart-card">
+    <h2 style="margin-top:0">Complaints by category</h2>
+    <canvas id="categoryChart" height="150"></canvas>
+  </div>
+</div>
+
+<h2>Complaints</h2>
 <div class="stats">
   <div class="stat"><div class="num">{{complaints.open}}</div><div class="label">Open</div></div>
   <div class="stat"><div class="num">{{complaints.inProgress}}</div><div class="label">In progress</div></div>
   <div class="stat"><div class="num">{{complaints.resolved}}</div><div class="label">Resolved</div></div>
 </div>
-{{#if complaints.byCategory}}
-<div class="card" style="margin-top:12px">
-  <table>
-    <thead><tr><th>Category</th><th>Complaints</th></tr></thead>
-    <tbody>
-      {{#each complaints.byCategory}}<tr><td>{{this.category}}</td><td>{{this.count}}</td></tr>{{/each}}
-    </tbody>
-  </table>
-</div>
-{{/if}}
 
-<h2>Payment Analytics</h2>
+<h2>Payments</h2>
 <div class="stats">
-  <div class="stat"><div class="num">₹{{payments.revenue}}</div><div class="label">Total collected</div></div>
-  <div class="stat"><div class="num">₹{{payments.pending}}</div><div class="label">Pending</div></div>
-  <div class="stat"><div class="num">₹{{payments.thisMonth}}</div><div class="label">This month</div></div>
-  <div class="stat"><div class="num">₹{{payments.rent}}</div><div class="label">Rent</div></div>
-  <div class="stat"><div class="num">₹{{payments.maintenance}}</div><div class="label">Maintenance</div></div>
-  <div class="stat"><div class="num">₹{{payments.other}}</div><div class="label">Other</div></div>
+  <div class="stat"><div class="num">₹{{payments.collected}}</div><div class="label">Collected in window</div></div>
+  {{!-- Outstanding is what is unpaid right now, so the window does not bound it. --}}
+  <div class="stat"><div class="num">₹{{payments.pending}}</div><div class="label">Outstanding (now)</div></div>
+  {{#each payments.byKind}}
+  <div class="stat"><div class="num">₹{{this.amount}}</div><div class="label">{{this.label}}</div></div>
+  {{/each}}
 </div>
 
-<h2>Society-wise Usage</h2>
+<h2>Society-wise usage
+  {{#if societyCount}}<span class="muted" style="font-weight:400; font-size:14px">· {{societyCount}} societ{{#if (eq societyCount 1)}}y{{else}}ies{{/if}}</span>{{/if}}
+</h2>
 <div class="card">
   <table>
-    <thead><tr><th>Society</th><th>Residents</th><th>Bills</th><th>Complaints</th><th>Visitors</th></tr></thead>
+    <thead>
+      <tr>
+        <th>Society</th><th>Residents</th><th>Bills</th><th>Complaints</th><th>Visitors</th>
+      </tr>
+    </thead>
     <tbody>
       {{#each usage}}
       <tr>
@@ -60,4 +85,44 @@
     </tbody>
   </table>
 </div>
+{{> pager pager}}
+<div class="muted" style="font-size:12px; margin:8px 2px">
+  Residents is the current total; bills, complaints and visitors are counted
+  inside the selected window.
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script>
+  const accent = '#6d43c8';
+  new Chart(document.getElementById('loginChart'), {
+    type: 'line',
+    data: {
+      labels: {{{json loginSeries.labels}}},
+      datasets: [{
+        data: {{{json loginSeries.data}}},
+        borderColor: accent,
+        backgroundColor: 'rgba(109,67,200,.12)',
+        fill: true,
+        tension: .35,
+      }],
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+    },
+  });
+
+  const categories = {{{json complaints.byCategory}}};
+  new Chart(document.getElementById('categoryChart'), {
+    type: 'bar',
+    data: {
+      labels: categories.map(c => c.category),
+      datasets: [{ data: categories.map(c => c.count), backgroundColor: accent }],
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+    },
+  });
+</script>
 {{> footer}}

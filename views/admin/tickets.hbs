@@ -10,35 +10,59 @@
 </div>
 
 {{#each tickets}}
-<div class="card" style="padding:16px; margin-bottom:12px">
-  <div style="display:flex; justify-content:space-between; align-items:start; gap:12px">
+<div class="card ticket">
+  <div class="ticket-head">
     <div>
-      <div style="font-weight:600">{{this.subject}}</div>
-      <div class="muted" style="font-size:13px; margin-top:2px">{{this.category}} · {{this.society}} · {{this.created}}</div>
+      <div class="ticket-subject">
+        {{this.subject}}
+        <span class="badge {{#if this.isClosed}}ok{{else if this.isPending}}free{{else}}paid{{/if}}">{{this.status}}</span>
+      </div>
+      <div class="ticket-meta">
+        {{this.society}} · {{this.category}} · {{this.created}}
+        {{#if this.replyCount}} · {{this.replyCount}} {{#if (eq this.replyCount 1)}}reply{{else}}replies{{/if}}{{/if}}
+      </div>
     </div>
-    <span class="badge {{#if this.isClosed}}ok{{else if this.isPending}}free{{else}}paid{{/if}}">{{this.status}}</span>
+    {{!-- Both controls submit on change, so no save buttons crowd the row. --}}
+    <div class="ticket-controls">
+      <form method="post" action="/admin/tickets/{{this.id}}/status">
+        <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
+        <select name="status" onchange="this.form.submit()" title="Status">
+          <option value="OPEN" {{#if this.isOpen}}selected{{/if}}>Open</option>
+          <option value="PENDING" {{#if this.isPending}}selected{{/if}}>Pending</option>
+          <option value="CLOSED" {{#if this.isClosed}}selected{{/if}}>Closed</option>
+        </select>
+      </form>
+      <form method="post" action="/admin/tickets/{{this.id}}/assign">
+        <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
+        <select name="assignee" onchange="this.form.submit()" title="Assigned to">
+          <option value="" {{#unless this.assignee}}selected{{/unless}}>Unassigned</option>
+          {{#each ../assignees}}
+            <option value="{{this}}" {{#if (eq this ../assignee)}}selected{{/if}}>{{this}}</option>
+          {{/each}}
+        </select>
+      </form>
+    </div>
   </div>
-  <p style="margin:10px 0 0">{{this.message}}</p>
-  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; align-items:center">
-    <form method="post" action="/admin/tickets/{{this.id}}/status" style="display:flex; gap:6px; align-items:center">
-      <span class="muted" style="font-size:13px">Status</span>
-      <select name="status" onchange="this.form.submit()">
-        <option value="OPEN" {{#if this.isOpen}}selected{{/if}}>Open</option>
-        <option value="PENDING" {{#if this.isPending}}selected{{/if}}>Pending</option>
-        <option value="CLOSED" {{#if this.isClosed}}selected{{/if}}>Closed</option>
-      </select>
-    </form>
-    <form method="post" action="/admin/tickets/{{this.id}}/assign" style="display:flex; gap:6px; align-items:center">
-      <span class="muted" style="font-size:13px">Assign</span>
-      <select name="assignee" onchange="this.form.submit()">
-        <option value="" {{#unless this.assignee}}selected{{/unless}}>Unassigned</option>
-        {{#each ../assignees}}
-          <option value="{{this}}" {{#if (eq this ../assignee)}}selected{{/if}}>{{this}}</option>
-        {{/each}}
-      </select>
-    </form>
+
+  {{!-- The conversation: the society on the left, our replies on the right —
+        the same reading order as the app. --}}
+  <div class="thread">
+    {{#each this.thread}}
+    <div class="msg {{#if this.fromSociety}}from-society{{else}}from-support{{/if}}">
+      <div class="msg-body">{{this.body}}</div>
+      <div class="msg-meta">{{this.author}} · {{this.at}}</div>
+    </div>
+    {{/each}}
   </div>
+
+  <form class="ticket-reply" method="post" action="/admin/tickets/{{this.id}}/reply">
+    <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
+    <textarea name="body" rows="1" required placeholder="Write a reply…"></textarea>
+    <button class="btn primary" type="submit">Send</button>
+  </form>
 </div>
 {{/each}}
-{{#unless tickets}}<div class="card" style="padding:24px" class="muted">No tickets.</div>{{/unless}}
+
+{{#unless tickets}}<div class="card muted" style="padding:24px">No tickets.</div>{{/unless}}
+{{> pager pager}}
 {{> footer}}
