@@ -20,14 +20,19 @@
         <td class="muted">{{this.society}}</td>
         <td>{{this.flat}}</td>
         <td>
-          <form method="post" action="/admin/complaints/{{this.id}}/status">
+          {{!-- Picking a status only marks the choice; Save writes it. It used
+                to submit on change, so a mis-click resolved a complaint with
+                no way back through the UI. --}}
+          <form method="post" action="/admin/complaints/{{this.id}}/status"
+                data-confirm-change style="display:flex; gap:6px; align-items:center">
             <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
             <input type="hidden" name="back" value="{{@root.pager.selfUrl}}" />
-            <select name="status" onchange="this.form.submit()">
+            <select name="status" data-initial="{{this.status}}">
               <option value="OPEN" {{#if this.isOpen}}selected{{/if}}>Open</option>
               <option value="IN_PROGRESS" {{#if this.isInProgress}}selected{{/if}}>In progress</option>
               <option value="RESOLVED" {{#if this.isResolved}}selected{{/if}}>Resolved</option>
             </select>
+            <button class="btn ghost small" type="submit" disabled>Save</button>
           </form>
         </td>
         <td>
@@ -47,4 +52,19 @@
   </table>
 </div>
 {{> pager pager}}
+
+{{!-- Keeps every "pick then Save" form quiet until its value actually
+      changes, so the button never invites a pointless write. --}}
+<script>
+  document.querySelectorAll('form[data-confirm-change]').forEach(function (form) {
+    var field = form.querySelector('select');
+    var save = form.querySelector('button[type=submit]');
+    if (!field || !save) return;
+    var sync = function () {
+      save.disabled = field.value === (field.dataset.initial || '');
+    };
+    field.addEventListener('change', sync);
+    sync();
+  });
+</script>
 {{> footer}}

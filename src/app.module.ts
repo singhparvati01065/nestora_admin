@@ -10,6 +10,7 @@ import { AdminController } from './admin/admin.controller';
 import { AdminAuthMiddleware } from './admin/admin-auth.middleware';
 import { CsrfMiddleware } from './admin/csrf.middleware';
 import { LoginThrottle } from './admin/login-throttle';
+import { LegalController } from './legal/legal.controller';
 import { PrismaService } from './prisma.service';
 
 @Module({
@@ -23,7 +24,7 @@ import { PrismaService } from './prisma.service';
       }),
     }),
   ],
-  controllers: [AdminController],
+  controllers: [AdminController, LegalController],
   providers: [PrismaService, LoginThrottle],
 })
 export class AppModule implements NestModule {

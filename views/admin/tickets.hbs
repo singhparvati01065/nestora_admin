@@ -22,24 +22,28 @@
         {{#if this.replyCount}} · {{this.replyCount}} {{#if (eq this.replyCount 1)}}reply{{else}}replies{{/if}}{{/if}}
       </div>
     </div>
-    {{!-- Both controls submit on change, so no save buttons crowd the row. --}}
+    {{!-- Each control keeps its own Save: closing a ticket or handing it to
+          someone else should take a deliberate second click, not follow the
+          first stray one. --}}
     <div class="ticket-controls">
-      <form method="post" action="/admin/tickets/{{this.id}}/status">
+      <form method="post" action="/admin/tickets/{{this.id}}/status" data-confirm-change>
         <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
-        <select name="status" onchange="this.form.submit()" title="Status">
+        <select name="status" data-initial="{{this.status}}" title="Status">
           <option value="OPEN" {{#if this.isOpen}}selected{{/if}}>Open</option>
           <option value="PENDING" {{#if this.isPending}}selected{{/if}}>Pending</option>
           <option value="CLOSED" {{#if this.isClosed}}selected{{/if}}>Closed</option>
         </select>
+        <button class="btn ghost small" type="submit" disabled>Save</button>
       </form>
-      <form method="post" action="/admin/tickets/{{this.id}}/assign">
+      <form method="post" action="/admin/tickets/{{this.id}}/assign" data-confirm-change>
         <input type="hidden" name="_csrf" value="{{@root.csrf}}" />
-        <select name="assignee" onchange="this.form.submit()" title="Assigned to">
+        <select name="assignee" data-initial="{{this.assignee}}" title="Assigned to">
           <option value="" {{#unless this.assignee}}selected{{/unless}}>Unassigned</option>
           {{#each ../assignees}}
             <option value="{{this}}" {{#if (eq this ../assignee)}}selected{{/if}}>{{this}}</option>
           {{/each}}
         </select>
+        <button class="btn ghost small" type="submit" disabled>Save</button>
       </form>
     </div>
   </div>
@@ -65,4 +69,17 @@
 
 {{#unless tickets}}<div class="card muted" style="padding:24px">No tickets.</div>{{/unless}}
 {{> pager pager}}
+{{!-- Same rule as Complaints: a picked value waits for its Save. --}}
+<script>
+  document.querySelectorAll('form[data-confirm-change]').forEach(function (form) {
+    var field = form.querySelector('select');
+    var save = form.querySelector('button[type=submit]');
+    if (!field || !save) return;
+    var sync = function () {
+      save.disabled = field.value === (field.dataset.initial || '');
+    };
+    field.addEventListener('change', sync);
+    sync();
+  });
+</script>
 {{> footer}}

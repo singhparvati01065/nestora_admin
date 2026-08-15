@@ -94,6 +94,8 @@ a.rowlink { color: var(--accent); text-decoration: none; font-weight: 600; }
 .btn.ghost { background: #fff; border: 1px solid var(--line); color: var(--text); }
 .btn.danger { background: var(--red); color: #fff; }
 .btn.small { padding: 6px 12px; font-size: 13px; }
+/* A Save that has nothing to write should look inert, not clickable. */
+.btn:disabled { opacity: .45; cursor: default; }
 .row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
 /* Forms */
@@ -196,6 +198,8 @@ th { position: relative; }
 .ticket-meta { color: var(--muted); font-size: 13px; margin-top: 3px; }
 .ticket-controls { display: flex; gap: 8px; }
 .ticket-controls select { max-width: 150px; }
+/* Each control is "select + Save", so the pair has to sit on one line. */
+.ticket-controls form { display: flex; gap: 6px; align-items: center; }
 
 /* Conversation */
 .thread { display: flex; flex-direction: column; gap: 8px; padding: 14px 0; }
