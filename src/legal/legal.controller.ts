@@ -12,7 +12,16 @@ import { PrismaService } from '../prisma.service';
 export class LegalController {
   constructor(private prisma: PrismaService) {}
 
-  private static readonly PUBLIC_KEYS = ['privacy', 'terms', 'faq', 'about', 'contact'];
+  private static readonly PUBLIC_KEYS = [
+    'privacy',
+    'terms',
+    'faq',
+    'about',
+    'contact',
+    // Play requires a page anyone can reach — without an account — that says
+    // how to have an account and its data deleted.
+    'delete-account',
+  ];
 
   @Get(':key')
   async page(@Param('key') key: string, @Res() res: Response) {
